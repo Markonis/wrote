@@ -60,9 +60,15 @@ export class WroteBlock {
   getCaretCoordinates() {
     const selection = window.getSelection();
     if (!selection.rangeCount) return null;
-    
+
     const range = selection.getRangeAt(0);
-    const rect = range.getBoundingClientRect();
+    let rect = range.getBoundingClientRect();
+
+    // Fall back to element's rect if range rect is invalid
+    if (!this.isValidRect(rect)) {
+      rect = this.element.getBoundingClientRect();
+    }
+
     return { x: rect.left, y: rect.top };
   }
   
