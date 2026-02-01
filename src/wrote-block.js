@@ -1,3 +1,5 @@
+import { BULLET_ICON, CHECKED_ICON, UNCHECKED_ICON } from './wrote-icons.js';
+
 export class WroteBlock {
   static LINE_POSITION_THRESHOLD = 5; // pixels
 
@@ -5,11 +7,26 @@ export class WroteBlock {
     this.component = component;
     this.element = document.createElement('div');
     this.contentElement = document.createElement('div');
+    this.prefix = null;
+    this.prefixElement = null;
     this.init();
   }
 
   init() {
     this.contentElement.contentEditable = true;
+
+    // Create prefix element
+    this.prefixElement = document.createElement('span');
+    this.prefixElement.className = 'wrote-prefix';
+    this.prefixElement.style.marginRight = "0.25rem";
+    this.renderPrefix();
+
+    // Apply styles
+    this.element.style.display = "flex";
+    this.element.style.alignItems = "flex-start";
+
+    // Append prefix and content to wrapper
+    this.element.appendChild(this.prefixElement);
     this.element.appendChild(this.contentElement);
 
     this.contentElement.addEventListener('keydown', (e) => {
@@ -17,6 +34,80 @@ export class WroteBlock {
         e.preventDefault();
       }
     });
+  }
+
+  renderPrefix() {
+    // Clear existing content
+    this.prefixElement.innerHTML = '';
+    this.prefixElement.className = 'wrote-prefix';
+
+    if (!this.prefix) {
+      return;
+    }
+
+    const iconMap = {
+      'bullet': BULLET_ICON,
+      'checked': CHECKED_ICON,
+      'unchecked': UNCHECKED_ICON
+    };
+
+    const svgString = iconMap[this.prefix];
+    if (svgString) {
+      this.prefixElement.innerHTML = svgString;
+    }
+  }
+
+  setPrefix(newPrefix) {
+    if (['bullet', 'checked', 'unchecked', null].includes(newPrefix)) {
+      this.prefix = newPrefix;
+      this.renderPrefix();
+    }
+  }
+
+  removeCharsFromStart(count) {
+    let charsRemoved = 0;
+    for (let node of this.contentElement.childNodes) {
+      if (node.nodeType === Node.TEXT_NODE) {
+        if (charsRemoved + node.textContent.length <= count) {
+          // Remove entire text node
+          const toRemove = node;
+          charsRemoved += node.textContent.length;
+          toRemove.remove();
+        } else {
+          // Partial removal of text node
+          const remainingChars = count - charsRemoved;
+          node.textContent = node.textContent.substring(remainingChars);
+          break;
+        }
+      }
+    }
+  }
+
+  detectAndApplyPrefix() {
+    const text = this.contentElement.textContent;
+
+    // Define prefix patterns
+    const patterns = [
+      { pattern: /^-/, prefix: 'bullet' },
+      { pattern: /^\[x\]\s?/, prefix: 'checked' },
+      { pattern: /^\[\]\s?/, prefix: 'unchecked' }
+    ];
+
+    // Check each pattern
+    for (const { pattern, prefix } of patterns) {
+      const match = text.match(pattern);
+      if (match) {
+        // Apply the prefix
+        this.setPrefix(prefix);
+
+        // Remove the matched pattern from content
+        this.removeCharsFromStart(match[0].length);
+
+        return true;
+      }
+    }
+
+    return false;
   }
   
   isNewLine(e) {
@@ -192,6 +283,12 @@ export class WroteBlock {
       return false;
     }
 
+    // If we have a prefix, clear it instead of merging
+    if (this.prefix) {
+      this.setPrefix(null);
+      return true;
+    }
+
     const mergeResult = this.component.merge(this);
     if (mergeResult) {
       const { block: targetBlock, mergeOffset } = mergeResult;
@@ -303,6 +400,8 @@ export class WroteBlock {
     if (this.handleArrowKeys(e)) {
       return true;
     }
+
+    setTimeout(() => this.detectAndApplyPrefix());
 
     return false;
   }
