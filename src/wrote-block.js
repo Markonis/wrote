@@ -4,12 +4,15 @@ export class WroteBlock {
   constructor(component) {
     this.component = component;
     this.element = document.createElement('div');
+    this.contentElement = document.createElement('div');
     this.init();
   }
-  
+
   init() {
-    this.element.contentEditable = true;
-    this.element.addEventListener('keydown', (e) => {
+    this.contentElement.contentEditable = true;
+    this.element.appendChild(this.contentElement);
+
+    this.contentElement.addEventListener('keydown', (e) => {
       if (this.handleKeyDown(e)) {
         e.preventDefault();
       }
@@ -25,30 +28,30 @@ export class WroteBlock {
   }
   
   isEmpty() {
-    return this.element.textContent.trim().length === 0;
+    return this.contentElement.textContent.trim().length === 0;
   }
   
   isCaretAtStart() {
     const selection = window.getSelection();
     if (!selection.rangeCount) return false;
-    
+
     const range = selection.getRangeAt(0);
     const preCaretRange = range.cloneRange();
-    preCaretRange.selectNodeContents(this.element);
+    preCaretRange.selectNodeContents(this.contentElement);
     preCaretRange.setEnd(range.endContainer, range.endOffset);
-    
+
     return preCaretRange.toString().length === 0;
   }
-  
+
   isCaretAtEnd() {
     const selection = window.getSelection();
     if (!selection.rangeCount) return false;
-    
+
     const range = selection.getRangeAt(0);
     const postCaretRange = range.cloneRange();
-    postCaretRange.selectNodeContents(this.element);
+    postCaretRange.selectNodeContents(this.contentElement);
     postCaretRange.setStart(range.endContainer, range.endOffset);
-    
+
     return postCaretRange.toString().length === 0;
   }
   
@@ -64,55 +67,55 @@ export class WroteBlock {
     const range = selection.getRangeAt(0);
     let rect = range.getBoundingClientRect();
 
-    // Fall back to element's rect if range rect is invalid
+    // Fall back to contentElement's rect if range rect is invalid
     if (!this.isValidRect(rect)) {
-      rect = this.element.getBoundingClientRect();
+      rect = this.contentElement.getBoundingClientRect();
     }
 
     return { x: rect.left, y: rect.top };
   }
 
   focus() {
-    this.element.focus();
+    this.contentElement.focus();
 
     // Position cursor at the start of the block
     const range = document.createRange();
     const selection = window.getSelection();
-    range.setStart(this.element, 0);
+    range.setStart(this.contentElement, 0);
     range.collapse(true);
     selection.removeAllRanges();
     selection.addRange(range);
   }
 
   focusAtEnd() {
-    this.element.focus();
+    this.contentElement.focus();
 
     // Position cursor at the end of the block
     const range = document.createRange();
     const selection = window.getSelection();
-    range.setStart(this.element, this.element.childNodes.length);
+    range.setStart(this.contentElement, this.contentElement.childNodes.length);
     range.collapse(true);
     selection.removeAllRanges();
     selection.addRange(range);
   }
 
   focusAtOffset(offset) {
-    this.element.focus();
+    this.contentElement.focus();
 
     // Position cursor at a specific offset in the block
     const range = document.createRange();
     const selection = window.getSelection();
-    range.setStart(this.element, offset);
+    range.setStart(this.contentElement, offset);
     range.collapse(true);
     selection.removeAllRanges();
     selection.addRange(range);
   }
 
   focusWithPosition(caretX, edge) {
-    this.element.focus();
+    this.contentElement.focus();
 
     // Determine y coordinate based on edge (top or bottom)
-    const blockRect = this.element.getBoundingClientRect();
+    const blockRect = this.contentElement.getBoundingClientRect();
     const targetY = edge === 'bottom'
       ? blockRect.bottom - WroteBlock.LINE_POSITION_THRESHOLD
       : blockRect.top + WroteBlock.LINE_POSITION_THRESHOLD;
@@ -151,36 +154,36 @@ export class WroteBlock {
   isCaretOnFirstLine() {
     const selection = window.getSelection();
     if (!selection.rangeCount) return true;
-    
+
     const currentRange = selection.getRangeAt(0);
     const currentCoords = currentRange.getBoundingClientRect();
-    
+
     // If we get invalid coordinates, assume we're on the first line to allow navigation
     if (!this.isValidRect(currentCoords)) {
       return true;
     }
-    
-    // Check if top of caret is within threshold of element's top
-    const elementCoords = this.element.getBoundingClientRect();
-    
+
+    // Check if top of caret is within threshold of contentElement's top
+    const elementCoords = this.contentElement.getBoundingClientRect();
+
     return currentCoords.top <= elementCoords.top + WroteBlock.LINE_POSITION_THRESHOLD;
   }
-  
+
   isCaretOnLastLine() {
     const selection = window.getSelection();
     if (!selection.rangeCount) return true;
-    
+
     const currentRange = selection.getRangeAt(0);
     const currentCoords = currentRange.getBoundingClientRect();
-    
+
     // If we get invalid coordinates, assume we're on the last line to allow navigation
     if (!this.isValidRect(currentCoords)) {
       return true;
     }
-    
-    // Check if bottom of caret is within threshold of element's bottom
-    const elementCoords = this.element.getBoundingClientRect();
-    
+
+    // Check if bottom of caret is within threshold of contentElement's bottom
+    const elementCoords = this.contentElement.getBoundingClientRect();
+
     return currentCoords.bottom >= elementCoords.bottom - WroteBlock.LINE_POSITION_THRESHOLD;
   }
   
@@ -194,8 +197,8 @@ export class WroteBlock {
       const { block: targetBlock, mergeOffset } = mergeResult;
 
       // Move our content to the target block
-      while (this.element.childNodes.length > 0) {
-        targetBlock.element.appendChild(this.element.childNodes[0]);
+      while (this.contentElement.childNodes.length > 0) {
+        targetBlock.contentElement.appendChild(this.contentElement.childNodes[0]);
       }
 
       // Remove this block via component and focus target
@@ -274,13 +277,13 @@ export class WroteBlock {
     // Create a range from cursor to end of block to extract content after cursor
     const endRange = document.createRange();
     endRange.setStart(range.endContainer, range.endOffset);
-    endRange.setEnd(this.element, this.element.childNodes.length);
+    endRange.setEnd(this.contentElement, this.contentElement.childNodes.length);
 
     // Extract content from cursor to end
     const contentAfter = endRange.extractContents();
 
     // Move extracted content to new block
-    newBlock.element.appendChild(contentAfter);
+    newBlock.contentElement.appendChild(contentAfter);
 
     // Focus new block
     newBlock.focus();
