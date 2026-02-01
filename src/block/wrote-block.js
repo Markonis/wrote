@@ -1,10 +1,9 @@
 import {
   isValidRect,
-  getCaretPositionFromPoint,
-  getPrefixIcon,
-  detectPrefixPattern
+  getCaretPositionFromPoint
 } from './wrote-block-utils.js';
 import { handleKeyDown } from './handlers/keydown-handler.js';
+import { WroteBlockPrefix } from './wrote-block-prefix.js';
 
 export class WroteBlock {
   static LINE_POSITION_THRESHOLD = 5; // pixels
@@ -19,32 +18,20 @@ export class WroteBlock {
     this.component = component;
     this.element = document.createElement('div');
     this.contentElement = document.createElement('div');
-    this.prefix = null;
-    this.prefixElement = null;
-    this.indent = 0;
+    this.prefix = new WroteBlockPrefix(WroteBlock.INDENT_UNIT);
     this.init();
   }
 
   init() {
     this.contentElement.contentEditable = true;
 
-    // Create prefix element
-    this.prefixElement = document.createElement('span');
-    this.prefixElement.className = 'wrote-prefix';
-    this.prefixElement.style.marginRight = "0.25rem";
-    this.renderPrefix();
-
     // Apply styles
     this.element.style.display = "flex";
     this.element.style.alignItems = "flex-start";
 
     // Append prefix and content to wrapper
-    this.element.appendChild(this.prefixElement);
+    this.element.appendChild(this.prefix.getElement());
     this.element.appendChild(this.contentElement);
-
-    this.prefixElement.addEventListener('click', () => {
-      this.handlePrefixClick();
-    });
 
     this.contentElement.addEventListener('keydown', (e) => {
       if (handleKeyDown(this, e)) {
@@ -53,49 +40,6 @@ export class WroteBlock {
     });
   }
 
-  renderPrefix() {
-    // Clear existing content
-    this.prefixElement.innerHTML = '';
-    this.prefixElement.className = 'wrote-prefix';
-
-    // Set cursor style based on whether prefix is clickable
-    if (this.prefix === WroteBlock.PREFIX.checked || this.prefix === WroteBlock.PREFIX.unchecked) {
-      this.prefixElement.style.cursor = 'pointer';
-    } else {
-      this.prefixElement.style.cursor = 'default';
-    }
-
-    if (!this.prefix) {
-      return;
-    }
-
-    const svgString = getPrefixIcon(this.prefix);
-    if (svgString) {
-      this.prefixElement.innerHTML = svgString;
-    }
-  }
-
-  setPrefix(newPrefix) {
-    if ([WroteBlock.PREFIX.bullet, WroteBlock.PREFIX.checked, WroteBlock.PREFIX.unchecked, null].includes(newPrefix)) {
-      this.prefix = newPrefix;
-      this.renderPrefix();
-    }
-  }
-
-  handlePrefixClick() {
-    if (this.prefix === WroteBlock.PREFIX.checked) {
-      this.setPrefix(WroteBlock.PREFIX.unchecked);
-    } else if (this.prefix === WroteBlock.PREFIX.unchecked) {
-      this.setPrefix(WroteBlock.PREFIX.checked);
-    }
-  }
-
-  setIndent(newIndent) {
-    if (newIndent >= 0) {
-      this.indent = newIndent;
-      this.prefixElement.style.marginLeft = `calc(${this.indent} * ${WroteBlock.INDENT_UNIT})`;
-    }
-  }
 
   removeCharsFromStart(count) {
     let charsRemoved = 0;
@@ -118,15 +62,11 @@ export class WroteBlock {
 
   detectAndApplyPrefix() {
     const text = this.contentElement.textContent;
-    const result = detectPrefixPattern(text);
+    const matchLength = this.prefix.detectAndApply(text);
 
-    if (result) {
-      // Apply the prefix
-      this.setPrefix(result.prefix);
-
+    if (matchLength > 0) {
       // Remove the matched pattern from content
-      this.removeCharsFromStart(result.matchLength);
-
+      this.removeCharsFromStart(matchLength);
       return true;
     }
 

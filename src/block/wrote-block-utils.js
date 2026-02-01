@@ -1,5 +1,3 @@
-import { BULLET_ICON, CHECKED_ICON, UNCHECKED_ICON } from '../wrote-icons.js';
-
 // Key detection utilities
 export function isNewLine(e) {
   return e.key === 'Enter';
@@ -35,36 +33,3 @@ export function getCaretPositionFromPoint(x, y) {
   return null;
 }
 
-// Prefix utilities
-const PREFIX_PATTERNS = [
-  { pattern: /^-/, prefix: 'bullet' },
-  { pattern: /^\[x\]\s?/, prefix: 'checked' },
-  { pattern: /^\[\]\s?/, prefix: 'unchecked' }
-];
-
-const ICON_MAP = {
-  bullet: BULLET_ICON,
-  checked: CHECKED_ICON,
-  unchecked: UNCHECKED_ICON
-};
-
-export function getPrefixIcon(prefix) {
-  if (!prefix) {
-    return null;
-  }
-  return ICON_MAP[prefix];
-}
-
-export function detectPrefixPattern(text) {
-  // Check each pattern
-  for (const { pattern, prefix } of PREFIX_PATTERNS) {
-    const match = text.match(pattern);
-    if (match) {
-      return {
-        prefix,
-        matchLength: match[0].length
-      };
-    }
-  }
-  return null;
-}

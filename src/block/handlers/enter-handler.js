@@ -9,8 +9,8 @@ export function handleEnter(block, e) {
   if (!newBlock) return false;
 
   // Inherit indent and prefix from current block
-  newBlock.setIndent(block.indent);
-  newBlock.setPrefix(block.prefix);
+  newBlock.prefix.setIndent(block.prefix.getIndent());
+  newBlock.prefix.setValue(block.prefix.getValue());
 
   const selection = window.getSelection();
   if (!selection.rangeCount) {

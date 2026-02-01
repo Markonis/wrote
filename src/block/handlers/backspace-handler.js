@@ -6,8 +6,8 @@ export function handleBackspace(block, e) {
   }
 
   // If we have a prefix, clear it instead of merging
-  if (block.prefix) {
-    block.setPrefix(null);
+  if (block.prefix.getValue()) {
+    block.prefix.setValue(null);
     return true;
   }
 
