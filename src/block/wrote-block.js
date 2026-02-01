@@ -1,4 +1,12 @@
-import { BULLET_ICON, CHECKED_ICON, UNCHECKED_ICON } from '../wrote-icons.js';
+import {
+  isNewLine,
+  isBackspace,
+  isDelete,
+  isValidRect,
+  getCaretPositionFromPoint,
+  getPrefixIcon,
+  detectPrefixPattern
+} from './wrote-block-utils.js';
 
 export class WroteBlock {
   static LINE_POSITION_THRESHOLD = 5; // pixels
@@ -63,13 +71,7 @@ export class WroteBlock {
       return;
     }
 
-    const iconMap = {
-      [WroteBlock.PREFIX.bullet]: BULLET_ICON,
-      [WroteBlock.PREFIX.checked]: CHECKED_ICON,
-      [WroteBlock.PREFIX.unchecked]: UNCHECKED_ICON
-    };
-
-    const svgString = iconMap[this.prefix];
+    const svgString = getPrefixIcon(this.prefix);
     if (svgString) {
       this.prefixElement.innerHTML = svgString;
     }
@@ -118,42 +120,21 @@ export class WroteBlock {
 
   detectAndApplyPrefix() {
     const text = this.contentElement.textContent;
+    const result = detectPrefixPattern(text);
 
-    // Define prefix patterns
-    const patterns = [
-      { pattern: /^-/, prefix: WroteBlock.PREFIX.bullet },
-      { pattern: /^\[x\]\s?/, prefix: WroteBlock.PREFIX.checked },
-      { pattern: /^\[\]\s?/, prefix: WroteBlock.PREFIX.unchecked }
-    ];
+    if (result) {
+      // Apply the prefix
+      this.setPrefix(result.prefix);
 
-    // Check each pattern
-    for (const { pattern, prefix } of patterns) {
-      const match = text.match(pattern);
-      if (match) {
-        // Apply the prefix
-        this.setPrefix(prefix);
+      // Remove the matched pattern from content
+      this.removeCharsFromStart(result.matchLength);
 
-        // Remove the matched pattern from content
-        this.removeCharsFromStart(match[0].length);
-
-        return true;
-      }
+      return true;
     }
 
     return false;
   }
   
-  isNewLine(e) {
-    return e.key === 'Enter';
-  }
-  
-  isBackspace(e) {
-    return e.key === 'Backspace';
-  }
-
-  isDelete(e) {
-    return e.key === 'Delete';
-  }
   
   isEmpty() {
     return this.contentElement.textContent.trim().length === 0;
@@ -183,11 +164,6 @@ export class WroteBlock {
     return postCaretRange.toString().length === 0;
   }
   
-  isValidRect(rect) {
-    // A valid rect should have non-zero width or height
-    return rect.width !== 0 || rect.height !== 0;
-  }
-  
   getCaretCoordinates() {
     const selection = window.getSelection();
     if (!selection.rangeCount) return null;
@@ -196,7 +172,7 @@ export class WroteBlock {
     let rect = range.getBoundingClientRect();
 
     // Fall back to contentElement's rect if range rect is invalid
-    if (!this.isValidRect(rect)) {
+    if (!isValidRect(rect)) {
       rect = this.contentElement.getBoundingClientRect();
     }
 
@@ -249,7 +225,7 @@ export class WroteBlock {
       : blockRect.top + WroteBlock.LINE_POSITION_THRESHOLD;
 
     // Try to position cursor at the given x coordinate
-    const caretPos = this.getCaretPositionFromPoint(caretX, targetY);
+    const caretPos = getCaretPositionFromPoint(caretX, targetY);
 
     if (caretPos) {
       const range = document.createRange();
@@ -264,21 +240,6 @@ export class WroteBlock {
     }
   }
   
-  getCaretPositionFromPoint(x, y) {
-    // Handle both caretPositionFromPoint (standard) and caretRangeFromPoint (Safari)
-    if (document.caretPositionFromPoint) {
-      return document.caretPositionFromPoint(x, y);
-    } else if (document.caretRangeFromPoint) {
-      const range = document.caretRangeFromPoint(x, y);
-      if (!range) return null;
-      return {
-        offsetNode: range.endContainer,
-        offset: range.endOffset
-      };
-    }
-    return null;
-  }
-  
   isCaretOnFirstLine() {
     const selection = window.getSelection();
     if (!selection.rangeCount) return true;
@@ -287,7 +248,7 @@ export class WroteBlock {
     const currentCoords = currentRange.getBoundingClientRect();
 
     // If we get invalid coordinates, assume we're on the first line to allow navigation
-    if (!this.isValidRect(currentCoords)) {
+    if (!isValidRect(currentCoords)) {
       return true;
     }
 
@@ -305,7 +266,7 @@ export class WroteBlock {
     const currentCoords = currentRange.getBoundingClientRect();
 
     // If we get invalid coordinates, assume we're on the last line to allow navigation
-    if (!this.isValidRect(currentCoords)) {
+    if (!isValidRect(currentCoords)) {
       return true;
     }
 
@@ -332,7 +293,7 @@ export class WroteBlock {
   }
 
   handleBackspace(e) {
-    if (!this.isBackspace(e) || !this.isCaretAtStart()) {
+    if (!isBackspace(e) || !this.isCaretAtStart()) {
       return false;
     }
 
@@ -361,7 +322,7 @@ export class WroteBlock {
   }
 
   handleDelete(e) {
-    if (!this.isDelete(e) || !this.isCaretAtEnd()) {
+    if (!isDelete(e) || !this.isCaretAtEnd()) {
       return false;
     }
 
@@ -431,7 +392,7 @@ export class WroteBlock {
   }
   
   handleEnter(e) {
-    if (!this.isNewLine(e)) {
+    if (!isNewLine(e)) {
       return false;
     }
 
