@@ -8,11 +8,6 @@ import { WroteBlockPrefix } from './wrote-block-prefix.js';
 export class WroteBlock {
   static LINE_POSITION_THRESHOLD = 5; // pixels
   static INDENT_UNIT = "1.5rem"; // indent multiplier
-  static PREFIX = {
-    checked: "checked",
-    unchecked: "unchecked",
-    bullet: "bullet"
-  }
 
   constructor(component) {
     this.component = component;
@@ -78,35 +73,39 @@ export class WroteBlock {
     return this.contentElement.textContent.trim().length === 0;
   }
   
+  isCaretAtPosition(direction) {
+    const range = this.getSelectionRange();
+    if (!range) return false;
+
+    const measureRange = range.cloneRange();
+    measureRange.selectNodeContents(this.contentElement);
+
+    if (direction === 'start') {
+      measureRange.setEnd(range.endContainer, range.endOffset);
+    } else {
+      measureRange.setStart(range.endContainer, range.endOffset);
+    }
+
+    return measureRange.toString().length === 0;
+  }
+
   isCaretAtStart() {
-    const selection = window.getSelection();
-    if (!selection.rangeCount) return false;
-
-    const range = selection.getRangeAt(0);
-    const preCaretRange = range.cloneRange();
-    preCaretRange.selectNodeContents(this.contentElement);
-    preCaretRange.setEnd(range.endContainer, range.endOffset);
-
-    return preCaretRange.toString().length === 0;
+    return this.isCaretAtPosition('start');
   }
 
   isCaretAtEnd() {
-    const selection = window.getSelection();
-    if (!selection.rangeCount) return false;
-
-    const range = selection.getRangeAt(0);
-    const postCaretRange = range.cloneRange();
-    postCaretRange.selectNodeContents(this.contentElement);
-    postCaretRange.setStart(range.endContainer, range.endOffset);
-
-    return postCaretRange.toString().length === 0;
+    return this.isCaretAtPosition('end');
   }
   
-  getCaretCoordinates() {
+  getSelectionRange() {
     const selection = window.getSelection();
-    if (!selection.rangeCount) return null;
+    return selection.rangeCount ? selection.getRangeAt(0) : null;
+  }
 
-    const range = selection.getRangeAt(0);
+  getCaretCoordinates() {
+    const range = this.getSelectionRange();
+    if (!range) return null;
+
     let rect = range.getBoundingClientRect();
 
     // Fall back to contentElement's rect if range rect is invalid
@@ -117,40 +116,27 @@ export class WroteBlock {
     return { x: rect.left, y: rect.top };
   }
 
-  focus() {
+  setCaretPosition(node, offset) {
     this.contentElement.focus();
 
-    // Position cursor at the start of the block
     const range = document.createRange();
     const selection = window.getSelection();
-    range.setStart(this.contentElement, 0);
+    range.setStart(node, offset);
     range.collapse(true);
     selection.removeAllRanges();
     selection.addRange(range);
+  }
+
+  focus() {
+    this.setCaretPosition(this.contentElement, 0);
   }
 
   focusAtEnd() {
-    this.contentElement.focus();
-
-    // Position cursor at the end of the block
-    const range = document.createRange();
-    const selection = window.getSelection();
-    range.setStart(this.contentElement, this.contentElement.childNodes.length);
-    range.collapse(true);
-    selection.removeAllRanges();
-    selection.addRange(range);
+    this.setCaretPosition(this.contentElement, this.contentElement.childNodes.length);
   }
 
   focusAtOffset(offset) {
-    this.contentElement.focus();
-
-    // Position cursor at a specific offset in the block
-    const range = document.createRange();
-    const selection = window.getSelection();
-    range.setStart(this.contentElement, offset);
-    range.collapse(true);
-    selection.removeAllRanges();
-    selection.addRange(range);
+    this.setCaretPosition(this.contentElement, offset);
   }
 
   focusWithPosition(caretX, edge) {
@@ -166,51 +152,35 @@ export class WroteBlock {
     const caretPos = getCaretPositionFromPoint(caretX, targetY);
 
     if (caretPos) {
-      const range = document.createRange();
-      const selection = window.getSelection();
-      range.setStart(caretPos.offsetNode, caretPos.offset);
-      range.collapse(true);
-      selection.removeAllRanges();
-      selection.addRange(range);
+      this.setCaretPosition(caretPos.offsetNode, caretPos.offset);
     } else {
       // Fallback: focus at start or end depending on edge
       edge === 'bottom' ? this.focusAtEnd() : this.focus();
     }
   }
   
-  isCaretOnFirstLine() {
-    const selection = window.getSelection();
-    if (!selection.rangeCount) return true;
+  isCaretNearLine(edge) {
+    const range = this.getSelectionRange();
+    if (!range) return true; // assume near line if we can't determine
 
-    const currentRange = selection.getRangeAt(0);
-    const currentCoords = currentRange.getBoundingClientRect();
-
-    // If we get invalid coordinates, assume we're on the first line to allow navigation
-    if (!isValidRect(currentCoords)) {
-      return true;
+    const caretCoords = range.getBoundingClientRect();
+    if (!isValidRect(caretCoords)) {
+      return true; // assume near line if coordinates are invalid
     }
 
-    // Check if top of caret is within threshold of contentElement's top
     const elementCoords = this.contentElement.getBoundingClientRect();
+    const threshold = WroteBlock.LINE_POSITION_THRESHOLD;
 
-    return currentCoords.top <= elementCoords.top + WroteBlock.LINE_POSITION_THRESHOLD;
+    return edge === 'top'
+      ? caretCoords.top <= elementCoords.top + threshold
+      : caretCoords.bottom >= elementCoords.bottom - threshold;
+  }
+
+  isCaretOnFirstLine() {
+    return this.isCaretNearLine('top');
   }
 
   isCaretOnLastLine() {
-    const selection = window.getSelection();
-    if (!selection.rangeCount) return true;
-
-    const currentRange = selection.getRangeAt(0);
-    const currentCoords = currentRange.getBoundingClientRect();
-
-    // If we get invalid coordinates, assume we're on the last line to allow navigation
-    if (!isValidRect(currentCoords)) {
-      return true;
-    }
-
-    // Check if bottom of caret is within threshold of contentElement's bottom
-    const elementCoords = this.contentElement.getBoundingClientRect();
-
-    return currentCoords.bottom >= elementCoords.bottom - WroteBlock.LINE_POSITION_THRESHOLD;
+    return this.isCaretNearLine('bottom');
   }
 }
