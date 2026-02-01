@@ -27,6 +27,10 @@ export class WroteComponent {
     throw new Error('merge must be implemented by subclass');
   }
 
+  mergeForward(sourceBlock) {
+    throw new Error('mergeForward must be implemented by subclass');
+  }
+
   remove(block) {
     throw new Error('remove must be implemented by subclass');
   }

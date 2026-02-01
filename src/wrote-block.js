@@ -150,6 +150,10 @@ export class WroteBlock {
   isBackspace(e) {
     return e.key === 'Backspace';
   }
+
+  isDelete(e) {
+    return e.key === 'Delete';
+  }
   
   isEmpty() {
     return this.contentElement.textContent.trim().length === 0;
@@ -355,6 +359,29 @@ export class WroteBlock {
 
     return false;
   }
+
+  handleDelete(e) {
+    if (!this.isDelete(e) || !this.isCaretAtEnd()) {
+      return false;
+    }
+
+    // Merge the next block into the current one
+    const mergeResult = this.component.mergeForward(this);
+    if (mergeResult) {
+      const { block: nextBlock } = mergeResult;
+
+      // Move next block's content into current block
+      while (nextBlock.contentElement.childNodes.length > 0) {
+        this.contentElement.appendChild(nextBlock.contentElement.childNodes[0]);
+      }
+
+      // Remove the next block via component
+      this.component.remove(nextBlock);
+      return true;
+    }
+
+    return false;
+  }
   
   handleArrowLeft(e) {
     if (e.key !== 'ArrowLeft' || !this.isCaretAtStart()) {
@@ -411,6 +438,10 @@ export class WroteBlock {
     const newBlock = this.component.split(this);
     if (!newBlock) return false;
 
+    // Inherit indent and prefix from current block
+    newBlock.setIndent(this.indent);
+    newBlock.setPrefix(this.prefix);
+
     const selection = window.getSelection();
     if (!selection.rangeCount) {
       // No selection, just focus new block at start
@@ -447,6 +478,10 @@ export class WroteBlock {
     }
 
     if (this.handleBackspace(e)) {
+      return true;
+    }
+
+    if (this.handleDelete(e)) {
       return true;
     }
 

@@ -86,6 +86,16 @@ export class VerticalLayout extends WroteComponent {
     return { block: previousBlock, mergeOffset };
   }
 
+  mergeForward(sourceBlock) {
+    const index = this.blocks.indexOf(sourceBlock);
+    if (index === -1 || index === this.blocks.length - 1) return null;
+
+    const nextBlock = this.blocks[index + 1];
+    if (!(nextBlock instanceof WroteBlock)) return null;
+
+    return { block: nextBlock };
+  }
+
   remove(block) {
     const index = this.blocks.indexOf(block);
     if (index === -1) return false;
