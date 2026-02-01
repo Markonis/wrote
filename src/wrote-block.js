@@ -1,8 +1,8 @@
 export class WroteBlock {
   static LINE_POSITION_THRESHOLD = 5; // pixels
-  
-  constructor(editor) {
-    this.editor = editor;
+
+  constructor(component) {
+    this.component = component;
     this.element = document.createElement('div');
     this.init();
   }
@@ -71,6 +71,67 @@ export class WroteBlock {
 
     return { x: rect.left, y: rect.top };
   }
+
+  focus() {
+    this.element.focus();
+
+    // Position cursor at the start of the block
+    const range = document.createRange();
+    const selection = window.getSelection();
+    range.setStart(this.element, 0);
+    range.collapse(true);
+    selection.removeAllRanges();
+    selection.addRange(range);
+  }
+
+  focusAtEnd() {
+    this.element.focus();
+
+    // Position cursor at the end of the block
+    const range = document.createRange();
+    const selection = window.getSelection();
+    range.setStart(this.element, this.element.childNodes.length);
+    range.collapse(true);
+    selection.removeAllRanges();
+    selection.addRange(range);
+  }
+
+  focusAtOffset(offset) {
+    this.element.focus();
+
+    // Position cursor at a specific offset in the block
+    const range = document.createRange();
+    const selection = window.getSelection();
+    range.setStart(this.element, offset);
+    range.collapse(true);
+    selection.removeAllRanges();
+    selection.addRange(range);
+  }
+
+  focusWithPosition(caretX, edge) {
+    this.element.focus();
+
+    // Determine y coordinate based on edge (top or bottom)
+    const blockRect = this.element.getBoundingClientRect();
+    const targetY = edge === 'bottom'
+      ? blockRect.bottom - WroteBlock.LINE_POSITION_THRESHOLD
+      : blockRect.top + WroteBlock.LINE_POSITION_THRESHOLD;
+
+    // Try to position cursor at the given x coordinate
+    const caretPos = this.getCaretPositionFromPoint(caretX, targetY);
+
+    if (caretPos) {
+      const range = document.createRange();
+      const selection = window.getSelection();
+      range.setStart(caretPos.offsetNode, caretPos.offset);
+      range.collapse(true);
+      selection.removeAllRanges();
+      selection.addRange(range);
+    } else {
+      // Fallback: focus at start or end depending on edge
+      edge === 'bottom' ? this.focusAtEnd() : this.focus();
+    }
+  }
   
   getCaretPositionFromPoint(x, y) {
     // Handle both caretPositionFromPoint (standard) and caretRangeFromPoint (Safari)
@@ -127,19 +188,22 @@ export class WroteBlock {
     if (!this.isBackspace(e) || !this.isCaretAtStart()) {
       return false;
     }
-    
-    const prevBlock = this.editor.getPreviousBlock(this);
-    if (prevBlock) {
-      if (this.isEmpty()) {
-        this.editor.deleteBlock(this);
-        this.editor.focusBlockAtEnd(prevBlock);
-      } else {
-        const mergeOffset = this.editor.mergeBlocks(prevBlock, this);
-        this.editor.focusBlockAtOffset(prevBlock, mergeOffset);
+
+    const mergeResult = this.component.merge(this);
+    if (mergeResult) {
+      const { block: targetBlock, mergeOffset } = mergeResult;
+
+      // Move our content to the target block
+      while (this.element.childNodes.length > 0) {
+        targetBlock.element.appendChild(this.element.childNodes[0]);
       }
+
+      // Remove this block via component and focus target
+      this.component.remove(this);
+      targetBlock.focusAtOffset(mergeOffset);
       return true;
     }
-    
+
     return false;
   }
   
@@ -147,84 +211,38 @@ export class WroteBlock {
     if (e.key !== 'ArrowLeft' || !this.isCaretAtStart()) {
       return false;
     }
-    
-    const prevBlock = this.editor.getPreviousBlock(this);
-    if (prevBlock) {
-      this.editor.focusBlockAtEnd(prevBlock);
-      return true;
-    }
-    
-    return false;
+
+    return this.component.moveLeft(this);
   }
-  
+
   handleArrowRight(e) {
     if (e.key !== 'ArrowRight' || !this.isCaretAtEnd()) {
       return false;
     }
-    
-    const nextBlock = this.editor.getNextBlock(this);
-    if (nextBlock) {
-      this.editor.focusBlock(nextBlock);
-      return true;
-    }
-    
-    return false;
+
+    return this.component.moveRight(this);
   }
   
   handleArrowUp(e) {
     if (e.key !== 'ArrowUp' || !this.isCaretOnFirstLine()) {
       return false;
     }
-    
-    const prevBlock = this.editor.getPreviousBlock(this);
-    if (!prevBlock) return false;
-    
+
     const coords = this.getCaretCoordinates();
     if (!coords) return false;
-    
-    const caretPos = this.getCaretPositionFromPoint(coords.x, prevBlock.element.getBoundingClientRect().bottom - 5);
-    if (!caretPos) {
-      // Fallback: jump to end of previous block
-      this.editor.focusBlock(prevBlock);
-      return true;
-    }
-    
-    this.editor.focusBlock(prevBlock);
-    const range = document.createRange();
-    const selection = window.getSelection();
-    range.setStart(caretPos.offsetNode, caretPos.offset);
-    range.collapse(true);
-    selection.removeAllRanges();
-    selection.addRange(range);
-    return true;
+
+    return this.component.moveUp(this, coords.x);
   }
   
   handleArrowDown(e) {
     if (e.key !== 'ArrowDown' || !this.isCaretOnLastLine()) {
       return false;
     }
-    
-    const nextBlock = this.editor.getNextBlock(this);
-    if (!nextBlock) return false;
-    
+
     const coords = this.getCaretCoordinates();
     if (!coords) return false;
-    
-    const caretPos = this.getCaretPositionFromPoint(coords.x, nextBlock.element.getBoundingClientRect().top + 5);
-    if (!caretPos) {
-      // Fallback: jump to start of next block
-      this.editor.focusBlock(nextBlock);
-      return true;
-    }
-    
-    this.editor.focusBlock(nextBlock);
-    const range = document.createRange();
-    const selection = window.getSelection();
-    range.setStart(caretPos.offsetNode, caretPos.offset);
-    range.collapse(true);
-    selection.removeAllRanges();
-    selection.addRange(range);
-    return true;
+
+    return this.component.moveDown(this, coords.x);
   }
   
   handleArrowKeys(e) {
@@ -240,30 +258,33 @@ export class WroteBlock {
     if (!this.isNewLine(e)) {
       return false;
     }
-    
+
+    const newBlock = this.component.split(this);
+    if (!newBlock) return false;
+
     const selection = window.getSelection();
     if (!selection.rangeCount) {
-      // No selection, just insert after
-      this.editor.insertBlockAfter(this);
+      // No selection, just focus new block at start
+      newBlock.focus();
       return true;
     }
-    
+
     const range = selection.getRangeAt(0);
-    
+
     // Create a range from cursor to end of block to extract content after cursor
     const endRange = document.createRange();
     endRange.setStart(range.endContainer, range.endOffset);
     endRange.setEnd(this.element, this.element.childNodes.length);
-    
+
     // Extract content from cursor to end
     const contentAfter = endRange.extractContents();
-    
-    // Create new block after current
-    const newBlock = this.editor.insertBlockAfter(this);
-    
+
     // Move extracted content to new block
     newBlock.element.appendChild(contentAfter);
-    
+
+    // Focus new block
+    newBlock.focus();
+
     return true;
   }
   
@@ -271,15 +292,15 @@ export class WroteBlock {
     if (this.handleEnter(e)) {
       return true;
     }
-    
+
     if (this.handleBackspace(e)) {
       return true;
     }
-    
+
     if (this.handleArrowKeys(e)) {
       return true;
     }
-    
+
     return false;
   }
 }
