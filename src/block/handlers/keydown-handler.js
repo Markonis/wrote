@@ -25,7 +25,10 @@ export function handleKeyDown(block, e) {
     return true;
   }
 
-  setTimeout(() => block.detectAndApplyPrefix());
+  setTimeout(() => {
+    block.detectAndApplyStyle();
+    block.detectAndApplyPrefix();
+  });
 
   return false;
 }

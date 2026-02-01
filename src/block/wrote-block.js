@@ -4,6 +4,7 @@ import {
 } from './wrote-block-utils.js';
 import { handleKeyDown } from './handlers/keydown-handler.js';
 import { WroteBlockPrefix } from './wrote-block-prefix.js';
+import { STYLES, getBlockStyleClass, detectBlockStyle } from './wrote-block-style.js';
 
 export class WroteBlock {
   static LINE_POSITION_THRESHOLD = 5; // pixels
@@ -14,6 +15,7 @@ export class WroteBlock {
     this.element = document.createElement('div');
     this.contentElement = document.createElement('div');
     this.prefix = new WroteBlockPrefix(WroteBlock.INDENT_UNIT);
+    this.style = STYLES.BODY;
     this.init();
   }
 
@@ -28,11 +30,43 @@ export class WroteBlock {
     this.element.appendChild(this.prefix.getElement());
     this.element.appendChild(this.contentElement);
 
+    this.applyStyleClass();
+
     this.contentElement.addEventListener('keydown', (e) => {
       if (handleKeyDown(this, e)) {
         e.preventDefault();
       }
     });
+  }
+
+  applyStyleClass() {
+    this.contentElement.className = getBlockStyleClass(this.style);
+  }
+
+  setStyle(style) {
+    if (Object.values(STYLES).includes(style)) {
+      this.style = style;
+      this.applyStyleClass();
+
+      // Clear prefix if changing to a heading style
+      if (style !== STYLES.BODY) {
+        this.prefix.setValue(null);
+      }
+    }
+  }
+
+  detectAndApplyStyle() {
+    const text = this.contentElement.textContent;
+    const detection = detectBlockStyle(text);
+
+    if (detection) {
+      this.setStyle(detection.style);
+      // Remove the matched pattern from content
+      this.removeCharsFromStart(detection.matchLength);
+      return true;
+    }
+
+    return false;
   }
 
 
@@ -56,6 +90,11 @@ export class WroteBlock {
   }
 
   detectAndApplyPrefix() {
+    // Only allow prefixes on body blocks
+    if (this.style !== STYLES.BODY) {
+      return false;
+    }
+
     const text = this.contentElement.textContent;
     const matchLength = this.prefix.detectAndApply(text);
 
