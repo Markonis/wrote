@@ -1,12 +1,10 @@
 import {
-  isNewLine,
-  isBackspace,
-  isDelete,
   isValidRect,
   getCaretPositionFromPoint,
   getPrefixIcon,
   detectPrefixPattern
 } from './wrote-block-utils.js';
+import { handleKeyDown } from './handlers/keydown-handler.js';
 
 export class WroteBlock {
   static LINE_POSITION_THRESHOLD = 5; // pixels
@@ -49,7 +47,7 @@ export class WroteBlock {
     });
 
     this.contentElement.addEventListener('keydown', (e) => {
-      if (this.handleKeyDown(e)) {
+      if (handleKeyDown(this, e)) {
         e.preventDefault();
       }
     });
@@ -274,184 +272,5 @@ export class WroteBlock {
     const elementCoords = this.contentElement.getBoundingClientRect();
 
     return currentCoords.bottom >= elementCoords.bottom - WroteBlock.LINE_POSITION_THRESHOLD;
-  }
-  
-  handleTab(e) {
-    if (e.key !== 'Tab') {
-      return false;
-    }
-
-    if (e.shiftKey) {
-      // Shift+Tab: decrement indent
-      this.setIndent(Math.max(0, this.indent - 1));
-    } else {
-      // Tab: increment indent
-      this.setIndent(this.indent + 1);
-    }
-
-    return true;
-  }
-
-  handleBackspace(e) {
-    if (!isBackspace(e) || !this.isCaretAtStart()) {
-      return false;
-    }
-
-    // If we have a prefix, clear it instead of merging
-    if (this.prefix) {
-      this.setPrefix(null);
-      return true;
-    }
-
-    const mergeResult = this.component.merge(this);
-    if (mergeResult) {
-      const { block: targetBlock, mergeOffset } = mergeResult;
-
-      // Move our content to the target block
-      while (this.contentElement.childNodes.length > 0) {
-        targetBlock.contentElement.appendChild(this.contentElement.childNodes[0]);
-      }
-
-      // Remove this block via component and focus target
-      this.component.remove(this);
-      targetBlock.focusAtOffset(mergeOffset);
-      return true;
-    }
-
-    return false;
-  }
-
-  handleDelete(e) {
-    if (!isDelete(e) || !this.isCaretAtEnd()) {
-      return false;
-    }
-
-    // Merge the next block into the current one
-    const mergeResult = this.component.mergeForward(this);
-    if (mergeResult) {
-      const { block: nextBlock } = mergeResult;
-
-      // Move next block's content into current block
-      while (nextBlock.contentElement.childNodes.length > 0) {
-        this.contentElement.appendChild(nextBlock.contentElement.childNodes[0]);
-      }
-
-      // Remove the next block via component
-      this.component.remove(nextBlock);
-      return true;
-    }
-
-    return false;
-  }
-  
-  handleArrowLeft(e) {
-    if (e.key !== 'ArrowLeft' || !this.isCaretAtStart()) {
-      return false;
-    }
-
-    return this.component.moveLeft(this);
-  }
-
-  handleArrowRight(e) {
-    if (e.key !== 'ArrowRight' || !this.isCaretAtEnd()) {
-      return false;
-    }
-
-    return this.component.moveRight(this);
-  }
-  
-  handleArrowUp(e) {
-    if (e.key !== 'ArrowUp' || !this.isCaretOnFirstLine()) {
-      return false;
-    }
-
-    const coords = this.getCaretCoordinates();
-    if (!coords) return false;
-
-    return this.component.moveUp(this, coords.x);
-  }
-  
-  handleArrowDown(e) {
-    if (e.key !== 'ArrowDown' || !this.isCaretOnLastLine()) {
-      return false;
-    }
-
-    const coords = this.getCaretCoordinates();
-    if (!coords) return false;
-
-    return this.component.moveDown(this, coords.x);
-  }
-  
-  handleArrowKeys(e) {
-    return (
-      this.handleArrowLeft(e) ||
-      this.handleArrowRight(e) ||
-      this.handleArrowUp(e) ||
-      this.handleArrowDown(e)
-    );
-  }
-  
-  handleEnter(e) {
-    if (!isNewLine(e)) {
-      return false;
-    }
-
-    const newBlock = this.component.split(this);
-    if (!newBlock) return false;
-
-    // Inherit indent and prefix from current block
-    newBlock.setIndent(this.indent);
-    newBlock.setPrefix(this.prefix);
-
-    const selection = window.getSelection();
-    if (!selection.rangeCount) {
-      // No selection, just focus new block at start
-      newBlock.focus();
-      return true;
-    }
-
-    const range = selection.getRangeAt(0);
-
-    // Create a range from cursor to end of block to extract content after cursor
-    const endRange = document.createRange();
-    endRange.setStart(range.endContainer, range.endOffset);
-    endRange.setEnd(this.contentElement, this.contentElement.childNodes.length);
-
-    // Extract content from cursor to end
-    const contentAfter = endRange.extractContents();
-
-    // Move extracted content to new block
-    newBlock.contentElement.appendChild(contentAfter);
-
-    // Focus new block
-    newBlock.focus();
-
-    return true;
-  }
-  
-  handleKeyDown(e) {
-    if (this.handleTab(e)) {
-      return true;
-    }
-
-    if (this.handleEnter(e)) {
-      return true;
-    }
-
-    if (this.handleBackspace(e)) {
-      return true;
-    }
-
-    if (this.handleDelete(e)) {
-      return true;
-    }
-
-    if (this.handleArrowKeys(e)) {
-      return true;
-    }
-
-    setTimeout(() => this.detectAndApplyPrefix());
-
-    return false;
   }
 }
