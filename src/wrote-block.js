@@ -2,6 +2,12 @@ import { BULLET_ICON, CHECKED_ICON, UNCHECKED_ICON } from './wrote-icons.js';
 
 export class WroteBlock {
   static LINE_POSITION_THRESHOLD = 5; // pixels
+  static INDENT_UNIT = "1.5rem"; // indent multiplier
+  static PREFIX = {
+    checked: "checked",
+    unchecked: "unchecked",
+    bullet: "bullet"
+  }
 
   constructor(component) {
     this.component = component;
@@ -9,6 +15,7 @@ export class WroteBlock {
     this.contentElement = document.createElement('div');
     this.prefix = null;
     this.prefixElement = null;
+    this.indent = 0;
     this.init();
   }
 
@@ -29,6 +36,10 @@ export class WroteBlock {
     this.element.appendChild(this.prefixElement);
     this.element.appendChild(this.contentElement);
 
+    this.prefixElement.addEventListener('click', () => {
+      this.handlePrefixClick();
+    });
+
     this.contentElement.addEventListener('keydown', (e) => {
       if (this.handleKeyDown(e)) {
         e.preventDefault();
@@ -41,14 +52,21 @@ export class WroteBlock {
     this.prefixElement.innerHTML = '';
     this.prefixElement.className = 'wrote-prefix';
 
+    // Set cursor style based on whether prefix is clickable
+    if (this.prefix === WroteBlock.PREFIX.checked || this.prefix === WroteBlock.PREFIX.unchecked) {
+      this.prefixElement.style.cursor = 'pointer';
+    } else {
+      this.prefixElement.style.cursor = 'default';
+    }
+
     if (!this.prefix) {
       return;
     }
 
     const iconMap = {
-      'bullet': BULLET_ICON,
-      'checked': CHECKED_ICON,
-      'unchecked': UNCHECKED_ICON
+      [WroteBlock.PREFIX.bullet]: BULLET_ICON,
+      [WroteBlock.PREFIX.checked]: CHECKED_ICON,
+      [WroteBlock.PREFIX.unchecked]: UNCHECKED_ICON
     };
 
     const svgString = iconMap[this.prefix];
@@ -58,9 +76,24 @@ export class WroteBlock {
   }
 
   setPrefix(newPrefix) {
-    if (['bullet', 'checked', 'unchecked', null].includes(newPrefix)) {
+    if ([WroteBlock.PREFIX.bullet, WroteBlock.PREFIX.checked, WroteBlock.PREFIX.unchecked, null].includes(newPrefix)) {
       this.prefix = newPrefix;
       this.renderPrefix();
+    }
+  }
+
+  handlePrefixClick() {
+    if (this.prefix === WroteBlock.PREFIX.checked) {
+      this.setPrefix(WroteBlock.PREFIX.unchecked);
+    } else if (this.prefix === WroteBlock.PREFIX.unchecked) {
+      this.setPrefix(WroteBlock.PREFIX.checked);
+    }
+  }
+
+  setIndent(newIndent) {
+    if (newIndent >= 0) {
+      this.indent = newIndent;
+      this.prefixElement.style.marginLeft = `calc(${this.indent} * ${WroteBlock.INDENT_UNIT})`;
     }
   }
 
@@ -88,9 +121,9 @@ export class WroteBlock {
 
     // Define prefix patterns
     const patterns = [
-      { pattern: /^-/, prefix: 'bullet' },
-      { pattern: /^\[x\]\s?/, prefix: 'checked' },
-      { pattern: /^\[\]\s?/, prefix: 'unchecked' }
+      { pattern: /^-/, prefix: WroteBlock.PREFIX.bullet },
+      { pattern: /^\[x\]\s?/, prefix: WroteBlock.PREFIX.checked },
+      { pattern: /^\[\]\s?/, prefix: WroteBlock.PREFIX.unchecked }
     ];
 
     // Check each pattern
@@ -278,6 +311,22 @@ export class WroteBlock {
     return currentCoords.bottom >= elementCoords.bottom - WroteBlock.LINE_POSITION_THRESHOLD;
   }
   
+  handleTab(e) {
+    if (e.key !== 'Tab') {
+      return false;
+    }
+
+    if (e.shiftKey) {
+      // Shift+Tab: decrement indent
+      this.setIndent(Math.max(0, this.indent - 1));
+    } else {
+      // Tab: increment indent
+      this.setIndent(this.indent + 1);
+    }
+
+    return true;
+  }
+
   handleBackspace(e) {
     if (!this.isBackspace(e) || !this.isCaretAtStart()) {
       return false;
@@ -389,6 +438,10 @@ export class WroteBlock {
   }
   
   handleKeyDown(e) {
+    if (this.handleTab(e)) {
+      return true;
+    }
+
     if (this.handleEnter(e)) {
       return true;
     }
