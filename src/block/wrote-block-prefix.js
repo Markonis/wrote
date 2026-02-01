@@ -43,7 +43,7 @@ export class WroteBlockPrefix {
     this.value = null;
     this.indent = 0;
     this.unit = indentUnit;
-    this.element = document.createElement('span');
+    this.element = document.createElement('div');
     this.element.className = 'wrote-prefix';
     this.element.style.marginRight = '0.25rem';
 
