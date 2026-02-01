@@ -1,5 +1,5 @@
-import { WroteBlock } from './wrote-block.js';
-import { VerticalLayout } from './vertical-layout.js';
+import { WroteBlock } from './block/wrote-block.js';
+import { VerticalLayout } from './component/vertical-layout.js';
 
 export class WroteEditor {
   constructor(containerElement) {

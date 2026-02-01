@@ -1,5 +1,5 @@
 import { WroteComponent } from './wrote-component.js';
-import { WroteBlock } from './wrote-block.js';
+import { WroteBlock } from '../block/wrote-block.js';
 
 export class VerticalLayout extends WroteComponent {
   constructor() {

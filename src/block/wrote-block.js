@@ -1,4 +1,4 @@
-import { BULLET_ICON, CHECKED_ICON, UNCHECKED_ICON } from './wrote-icons.js';
+import { BULLET_ICON, CHECKED_ICON, UNCHECKED_ICON } from '../wrote-icons.js';
 
 export class WroteBlock {
   static LINE_POSITION_THRESHOLD = 5; // pixels
