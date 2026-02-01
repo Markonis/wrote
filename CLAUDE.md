@@ -1,0 +1,1 @@
+DO NOT use plan mode. Alsways discuss in a conversational way.
