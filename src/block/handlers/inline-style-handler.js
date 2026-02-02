@@ -1,4 +1,6 @@
-export function handleInlineStyles(block, e) {
+import { applyInlineStyle } from '../wrote-block-utils.js';
+
+export function handleInlineStyles(e) {
   // Check for Ctrl/Cmd key combination
   const isCtrlOrCmd = e.ctrlKey || e.metaKey;
 
@@ -6,18 +8,15 @@ export function handleInlineStyles(block, e) {
     return false;
   }
 
-  // Ensure semantic HTML formatting instead of CSS styles
-  document.execCommand('styleWithCSS', false, false);
-
   switch (e.key.toLowerCase()) {
     case 'b':
-      document.execCommand('bold', false, null);
+      applyInlineStyle('bold');
       return true;
     case 'i':
-      document.execCommand('italic', false, null);
+      applyInlineStyle('italic');
       return true;
     case 'u':
-      document.execCommand('underline', false, null);
+      applyInlineStyle('underline');
       return true;
     default:
       return false;

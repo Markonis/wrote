@@ -143,3 +143,14 @@ export function getDirectChildOf(parent, innerChild) {
   }
   return child;
 }
+
+/**
+ * Applies an inline style command using execCommand.
+ * Ensures semantic HTML formatting instead of CSS styles.
+ * @param {string} command - The command to execute ('bold', 'italic', 'underline')
+ */
+export function applyInlineStyle(command) {
+  // Ensure semantic HTML formatting instead of CSS styles
+  document.execCommand('styleWithCSS', false, false);
+  document.execCommand(command, false, null);
+}
