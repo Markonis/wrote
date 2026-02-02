@@ -1,4 +1,5 @@
-import { setCaretPosition, findPrecedingTextMatch } from './wrote-block-utils.js';
+import { findPrecedingTextMatch } from './wrote-text-matcher.js';
+import { setCaretPosition } from './wrote-block-utils.js';
 
 const MAX_LOOKBACK = 100;
 
