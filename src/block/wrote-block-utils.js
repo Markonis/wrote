@@ -112,5 +112,3 @@ export function isCaretNearLine(node, edge, threshold) {
     ? caretCoords.top <= elementCoords.top + threshold
     : caretCoords.bottom >= elementCoords.bottom - threshold;
 }
-
-// Text matching utilities
