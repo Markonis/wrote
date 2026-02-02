@@ -4,6 +4,7 @@ import { handleDelete } from './delete-handler.js';
 import { handleEnter } from './enter-handler.js';
 import { handleArrowKeys } from './arrow-handlers.js';
 import { handleInlineStyles } from './inline-style-handler.js';
+import { detectAndApplyInlineCode } from '../inline-detector.js';
 
 export function handleKeyDown(block, e) {
   if (handleInlineStyles(block, e)) {
@@ -33,6 +34,7 @@ export function handleKeyDown(block, e) {
   setTimeout(() => {
     block.detectAndApplyStyle();
     block.detectAndApplyPrefix();
+    detectAndApplyInlineCode(block);
   });
 
   return false;

@@ -1,6 +1,10 @@
 import {
-  isValidRect,
-  getCaretPositionFromPoint
+  getCaretPositionFromPoint,
+  setCaretPosition,
+  isCaretAtPosition,
+  getCaretCoordinates as getCaretCoordinatesUtil,
+  removeCharsFromStart,
+  isCaretNearLine
 } from './wrote-block-utils.js';
 import { handleKeyDown } from './handlers/keydown-handler.js';
 import { WroteBlockPrefix } from './wrote-block-prefix.js';
@@ -62,31 +66,11 @@ export class WroteBlock {
     if (detection) {
       this.setStyle(detection.style);
       // Remove the matched pattern from content
-      this.removeCharsFromStart(detection.matchLength);
+      removeCharsFromStart(this.contentElement, detection.matchLength);
       return true;
     }
 
     return false;
-  }
-
-
-  removeCharsFromStart(count) {
-    let charsRemoved = 0;
-    for (let node of this.contentElement.childNodes) {
-      if (node.nodeType === Node.TEXT_NODE) {
-        if (charsRemoved + node.textContent.length <= count) {
-          // Remove entire text node
-          const toRemove = node;
-          charsRemoved += node.textContent.length;
-          toRemove.remove();
-        } else {
-          // Partial removal of text node
-          const remainingChars = count - charsRemoved;
-          node.textContent = node.textContent.substring(remainingChars);
-          break;
-        }
-      }
-    }
   }
 
   detectAndApplyPrefix() {
@@ -100,70 +84,32 @@ export class WroteBlock {
 
     if (matchLength > 0) {
       // Remove the matched pattern from content
-      this.removeCharsFromStart(matchLength);
+      removeCharsFromStart(this.contentElement, matchLength);
       return true;
     }
 
     return false;
   }
   
-  
   isEmpty() {
     return this.contentElement.textContent.trim().length === 0;
   }
-  
-  isCaretAtPosition(direction) {
-    const range = this.getSelectionRange();
-    if (!range) return false;
-
-    const measureRange = range.cloneRange();
-    measureRange.selectNodeContents(this.contentElement);
-
-    if (direction === 'start') {
-      measureRange.setEnd(range.endContainer, range.endOffset);
-    } else {
-      measureRange.setStart(range.endContainer, range.endOffset);
-    }
-
-    return measureRange.toString().length === 0;
-  }
 
   isCaretAtStart() {
-    return this.isCaretAtPosition('start');
+    return isCaretAtPosition(this.contentElement, 'start');
   }
 
   isCaretAtEnd() {
-    return this.isCaretAtPosition('end');
-  }
-  
-  getSelectionRange() {
-    const selection = window.getSelection();
-    return selection.rangeCount ? selection.getRangeAt(0) : null;
+    return isCaretAtPosition(this.contentElement, 'end');
   }
 
   getCaretCoordinates() {
-    const range = this.getSelectionRange();
-    if (!range) return null;
-
-    let rect = range.getBoundingClientRect();
-
-    // Fall back to contentElement's rect if range rect is invalid
-    if (!isValidRect(rect)) {
-      rect = this.contentElement.getBoundingClientRect();
-    }
-
-    return { x: rect.left, y: rect.top };
+    return getCaretCoordinatesUtil(this.contentElement);
   }
 
   setCaretPosition(node, offset) {
     this.contentElement.focus();
-
-    const range = document.createRange();
-    const selection = window.getSelection();
-    range.setStart(node, offset);
-    range.collapse(true);
-    selection.removeAllRanges();
-    selection.addRange(range);
+    setCaretPosition(node, offset);
   }
 
   focus() {
@@ -198,28 +144,11 @@ export class WroteBlock {
     }
   }
   
-  isCaretNearLine(edge) {
-    const range = this.getSelectionRange();
-    if (!range) return true; // assume near line if we can't determine
-
-    const caretCoords = range.getBoundingClientRect();
-    if (!isValidRect(caretCoords)) {
-      return true; // assume near line if coordinates are invalid
-    }
-
-    const elementCoords = this.contentElement.getBoundingClientRect();
-    const threshold = WroteBlock.LINE_POSITION_THRESHOLD;
-
-    return edge === 'top'
-      ? caretCoords.top <= elementCoords.top + threshold
-      : caretCoords.bottom >= elementCoords.bottom - threshold;
-  }
-
   isCaretOnFirstLine() {
-    return this.isCaretNearLine('top');
+    return isCaretNearLine(this.contentElement, 'top', WroteBlock.LINE_POSITION_THRESHOLD);
   }
 
   isCaretOnLastLine() {
-    return this.isCaretNearLine('bottom');
+    return isCaretNearLine(this.contentElement, 'bottom', WroteBlock.LINE_POSITION_THRESHOLD);
   }
 }
