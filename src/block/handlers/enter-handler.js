@@ -5,6 +5,18 @@ export function handleEnter(block, e) {
     return false;
   }
 
+  // Check if the block is empty
+  if (block.isEmpty()) {
+    const currentIndent = block.prefix.getIndent();
+    if (currentIndent > 0) {
+      block.prefix.setIndent(currentIndent - 1);
+      return true;
+    } else if (block.prefix.getValue() !== null) {
+      block.prefix.setValue(null);
+      return true;
+    }
+  }
+
   const newBlock = block.component.split(block);
   if (!newBlock) return false;
 

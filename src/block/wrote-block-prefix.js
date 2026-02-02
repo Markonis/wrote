@@ -8,7 +8,7 @@ export class WroteBlockPrefix {
   };
 
   static PATTERNS = [
-    { pattern: /^-/, prefix: 'bullet' },
+    { pattern: /^[-\*]/, prefix: 'bullet' },
     { pattern: /^\[x\]\s?/, prefix: 'checked' },
     { pattern: /^\[\]\s?/, prefix: 'unchecked' }
   ];
