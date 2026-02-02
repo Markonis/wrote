@@ -4,7 +4,9 @@ import {
   isCaretAtPosition,
   getCaretCoordinates as getCaretCoordinatesUtil,
   removeCharsFromStart,
-  isCaretNearLine
+  isCaretNearLine,
+  isInsideNonEditableElement,
+  getDirectChildOf
 } from './wrote-block-utils.js';
 import { handleKeyDown } from './handlers/keydown-handler.js';
 import { WroteBlockPrefix } from './wrote-block-prefix.js';
@@ -137,7 +139,18 @@ export class WroteBlock {
     const caretPos = getCaretPositionFromPoint(caretX, targetY);
 
     if (caretPos) {
-      this.setCaretPosition(caretPos.offsetNode, caretPos.offset);
+      // Check if the caret position is inside a non-editable element
+      if (isInsideNonEditableElement(caretPos.offsetNode, this.contentElement)) {
+        // Find the direct child of contentElement that contains the caret position
+        const child = getDirectChildOf(this.contentElement, caretPos.offsetNode);
+        if (child) {
+          // Place caret right after the direct child
+          const index = Array.from(this.contentElement.childNodes).indexOf(child);
+          this.setCaretPosition(this.contentElement, index + 1);
+        }
+      } else {
+        this.setCaretPosition(caretPos.offsetNode, caretPos.offset);
+      }
     } else {
       // Fallback: focus at start or end depending on edge
       edge === 'bottom' ? this.focusAtEnd() : this.focus();

@@ -1,20 +1,4 @@
-
-/**
- * Checks if a text node is inside a non-contenteditable element.
- * @param {Node} textNode - The text node to check
- * @param {Node} searchRoot - The root element we're searching within (boundary)
- * @returns {boolean} True if the text node is inside a contenteditable="false" element
- */
-function isInsideNonEditableElement(textNode, searchRoot) {
-  let current = textNode.parentNode;
-  while (current && current !== searchRoot) {
-    if (current.getAttribute?.('contenteditable') === 'false') {
-      return true;
-    }
-    current = current.parentNode;
-  }
-  return false;
-}
+import { isInsideNonEditableElement } from "./wrote-block-utils.js";
 
 /**
  * Searches backwards from the caret position for text matching a condition.
