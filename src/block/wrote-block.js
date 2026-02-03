@@ -11,6 +11,7 @@ import {
 import { handleKeyDown } from './handlers/keydown-handler.js';
 import { handleBeforeInput } from './handlers/beforeinput-handler.js';
 import { handlePaste } from './handlers/paste-handler.js';
+import { handleSelection } from './handlers/selection-handler.js';
 import { WroteBlockPrefix } from './wrote-block-prefix.js';
 import { STYLES, getBlockStyleClass, detectBlockStyle } from './wrote-block-style.js';
 
@@ -55,6 +56,10 @@ export class WroteBlock {
       if (handlePaste(this, e)) {
         e.preventDefault();
       }
+    });
+
+    document.addEventListener('selectionchange', () => {
+      handleSelection(this);
     });
   }
 

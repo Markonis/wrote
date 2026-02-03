@@ -1,6 +1,17 @@
 export class WroteComponent {
   constructor() {
     this.parentComponent = null;
+    this.editor = null;
+  }
+
+  getEditor() {
+    if (this.editor) {
+      return this.editor;
+    }
+    if (this.parentComponent) {
+      return this.parentComponent.getEditor();
+    }
+    return null;
   }
 
   moveLeft(source) {
