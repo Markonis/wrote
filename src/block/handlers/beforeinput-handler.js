@@ -2,6 +2,10 @@ import { insertTextInRange } from '../wrote-block-utils.js';
 import { detectAndApplyFormats } from '../block-detection-helpers.js';
 
 export function handleBeforeInput(block, e) {
+  if (!block.component.getEditor().canWrite()) {
+    return true;
+  }
+
   // Only intercept text insertion events
   if (e.inputType !== 'insertText' && e.inputType !== 'insertCompositionText') {
     return false;

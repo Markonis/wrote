@@ -1,5 +1,5 @@
 import { STYLES } from './wrote-block-style.js';
-import { detectAndApplyInlineCode, detectAndApplyBold, detectAndApplyItalic } from './wrote-inline-detector.js';
+import { detectAndApplyInlineCode, detectAndApplyBold, detectAndApplyItalic, detectAndTriggerActionDropdown } from './wrote-inline-detector.js';
 
 /**
  * Detects and applies formatting: block styles, prefixes, and inline styles.
@@ -11,6 +11,7 @@ export function detectAndApplyFormats(block) {
   if (block.style === STYLES.CODE) return;
   block.detectAndApplyStyle();
   block.detectAndApplyPrefix();
+  detectAndTriggerActionDropdown(block);
   detectAndApplyInlineCode(block);
   detectAndApplyBold(block);
   detectAndApplyItalic(block);

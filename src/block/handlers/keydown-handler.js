@@ -6,6 +6,10 @@ import { handleInlineStyles } from './inline-style-handler.js';
 import { handleTab } from './tab-handler.js';
 
 export function handleKeyDown(block, e) {
+  if (!block.component.getEditor().canWrite()) {
+    return true;
+  }
+
   if (handleInlineStyles(e)) {
     return true;
   }

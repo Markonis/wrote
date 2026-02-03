@@ -2,6 +2,7 @@ import { applyInlineElement } from './wrote-block-utils.js';
 import { findPrecedingTextMatch } from './wrote-text-matcher.js';
 
 const MAX_LOOKBACK = 100;
+const ACTION_DROPDOWN_MAX_LOOKBACK = 1; // Only look for "/" immediately before caret
 
 export function detectAndApplyInlineCode(block) {
   const range = findPrecedingTextMatch({
@@ -58,4 +59,22 @@ export function detectAndApplyItalic(block) {
   }
 
   return applyInlineElement(range, 'em', 1);
+}
+
+export function detectAndTriggerActionDropdown(block) {
+  const range = findPrecedingTextMatch({
+    node: block.contentElement,
+    maxLookback: ACTION_DROPDOWN_MAX_LOOKBACK,
+    trigger: (char) => char === '/',
+    match: (text) => text === '/'
+  });
+
+  if (!range) {
+    return false;
+  }
+
+  // Show action dropdown (don't delete "/" yet - will be deleted only if action is selected)
+  block.component.getEditor().showActionDropdown(block, range);
+
+  return true;
 }
