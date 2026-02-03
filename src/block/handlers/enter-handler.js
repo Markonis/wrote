@@ -12,8 +12,7 @@ export function handleEnter(block, e) {
     if (!selection.rangeCount) return false;
 
     const range = selection.getRangeAt(0);
-    const newLine = document.createTextNode(
-      block.isCaretAtEnd() ? "\n\n" : "\n");
+    const newLine = document.createTextNode("\n");
     range.insertNode(newLine);
     
     // Position caret after the target node

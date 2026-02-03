@@ -5,6 +5,7 @@
 
 .wr-block > :nth-child(2) {
   flex-grow: 1;
+  white-space: pre-wrap;
 }
 
 .wr-block-body {

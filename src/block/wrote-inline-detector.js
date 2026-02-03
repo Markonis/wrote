@@ -1,5 +1,5 @@
+import { setCaretPosition } from './wrote-block-utils.js';
 import { findPrecedingTextMatch } from './wrote-text-matcher.js';
-import { setCaretAfter, setCaretPosition } from './wrote-block-utils.js';
 
 const MAX_LOOKBACK = 100;
 
@@ -80,9 +80,6 @@ function applyInlineElement(range, elementTagName, delimiterLength) {
   // Insert space and position cursor
   const space = document.createTextNode(' ');
   element.after(space);
-  if (space.nextSibling == null || !space.nextSibling.textContent.trim()) {
-    space.textContent = " \u00A0";
-  }
   setCaretPosition(space, 1);
 
   return true;

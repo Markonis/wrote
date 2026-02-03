@@ -22,7 +22,7 @@ export function handleBackspace(block, e) {
 
     // Remove this block via component and focus target
     block.component.remove(block);
-    targetBlock.focusAtOffset(mergeOffset);
+    targetBlock.setCaretPosition(targetBlock.contentElement, mergeOffset);
     return true;
   }
 

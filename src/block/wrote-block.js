@@ -9,6 +9,7 @@ import {
   getDirectChildOf
 } from './wrote-block-utils.js';
 import { handleKeyDown } from './handlers/keydown-handler.js';
+import { handleBeforeInput } from './handlers/beforeinput-handler.js';
 import { WroteBlockPrefix } from './wrote-block-prefix.js';
 import { STYLES, getBlockStyleClass, detectBlockStyle } from './wrote-block-style.js';
 
@@ -36,6 +37,12 @@ export class WroteBlock {
     this.element.appendChild(this.contentElement);
 
     this.applyStyleClass();
+
+    this.contentElement.addEventListener('beforeinput', (e) => {
+      if (handleBeforeInput(this, e)) {
+        e.preventDefault();
+      }
+    });
 
     this.contentElement.addEventListener('keydown', (e) => {
       if (handleKeyDown(this, e)) {
@@ -127,10 +134,6 @@ export class WroteBlock {
 
   focusAtEnd() {
     this.setCaretPosition(this.contentElement, this.contentElement.childNodes.length);
-  }
-
-  focusAtOffset(offset) {
-    this.setCaretPosition(this.contentElement, offset);
   }
 
   focusWithPosition(caretX, edge) {
