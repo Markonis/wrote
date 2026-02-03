@@ -54,6 +54,31 @@ export function setCaretAfter(node) {
   setCaretPosition(parentNode, offset);
 }
 
+export function insertTextInRange(text, range) {
+  // Delete selected content if any
+  if (!range.collapsed) {
+    range.deleteContents();
+  }
+
+  // Insert text
+  if (range.endContainer.nodeType === Node.TEXT_NODE) {
+    range.endContainer.insertData(range.endOffset, text);
+    range.setStart(range.endContainer, range.endOffset + text.length);
+    range.collapse(true);
+  } else {
+    // Create new text node if not in a text node
+    const textNode = document.createTextNode(text);
+    range.insertNode(textNode);
+    range.setStart(textNode, text.length);
+    range.collapse(true);
+  }
+
+  // Update selection
+  const selection = window.getSelection();
+  selection.removeAllRanges();
+  selection.addRange(range);
+}
+
 export function isCaretAtPosition(node, direction) {
   const range = getSelectionRange();
   if (!range) return false;

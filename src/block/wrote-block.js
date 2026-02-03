@@ -10,6 +10,7 @@ import {
 } from './wrote-block-utils.js';
 import { handleKeyDown } from './handlers/keydown-handler.js';
 import { handleBeforeInput } from './handlers/beforeinput-handler.js';
+import { handlePaste } from './handlers/paste-handler.js';
 import { WroteBlockPrefix } from './wrote-block-prefix.js';
 import { STYLES, getBlockStyleClass, detectBlockStyle } from './wrote-block-style.js';
 
@@ -46,6 +47,12 @@ export class WroteBlock {
 
     this.contentElement.addEventListener('keydown', (e) => {
       if (handleKeyDown(this, e)) {
+        e.preventDefault();
+      }
+    });
+
+    this.contentElement.addEventListener('paste', (e) => {
+      if (handlePaste(this, e)) {
         e.preventDefault();
       }
     });
