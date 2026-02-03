@@ -4,7 +4,7 @@ import {
   isCaretAtPosition,
   getCaretCoordinates as getCaretCoordinatesUtil,
   removeCharsFromStart,
-  isCaretNearLine,
+  isCaretNearEdge,
   isInsideNonEditableElement,
   getDirectChildOf
 } from './wrote-block-utils.js';
@@ -29,8 +29,7 @@ export class WroteBlock {
     this.contentElement.contentEditable = true;
 
     // Apply styles
-    this.element.style.display = "flex";
-    this.element.style.alignItems = "flex-start";
+    this.element.className = "wr-block";
 
     // Append prefix and content to wrapper
     this.element.appendChild(this.prefix.getElement());
@@ -104,6 +103,14 @@ export class WroteBlock {
   isCaretAtEnd() {
     return isCaretAtPosition(this.contentElement, 'end');
   }
+  
+  isCaretOnFirstLine() {
+    return isCaretNearEdge(this.contentElement, 'top', WroteBlock.LINE_POSITION_THRESHOLD);
+  }
+
+  isCaretOnLastLine() {
+    return isCaretNearEdge(this.contentElement, 'bottom', WroteBlock.LINE_POSITION_THRESHOLD);
+  }
 
   getCaretCoordinates() {
     return getCaretCoordinatesUtil(this.contentElement);
@@ -155,13 +162,5 @@ export class WroteBlock {
       // Fallback: focus at start or end depending on edge
       edge === 'bottom' ? this.focusAtEnd() : this.focus();
     }
-  }
-  
-  isCaretOnFirstLine() {
-    return isCaretNearLine(this.contentElement, 'top', WroteBlock.LINE_POSITION_THRESHOLD);
-  }
-
-  isCaretOnLastLine() {
-    return isCaretNearLine(this.contentElement, 'bottom', WroteBlock.LINE_POSITION_THRESHOLD);
   }
 }

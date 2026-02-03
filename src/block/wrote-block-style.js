@@ -2,7 +2,8 @@ export const STYLES = {
   BODY: 'body',
   H1: 'h1',
   H2: 'h2',
-  H3: 'h3'
+  H3: 'h3',
+  CODE: 'code'
 };
 
 export function getBlockStyleClass(style) {
@@ -10,6 +11,15 @@ export function getBlockStyleClass(style) {
 }
 
 export function detectBlockStyle(text) {
+  // Match triple backticks at the start
+  const codeMatch = text.match(/^```(\w*)\s?/);
+  if (codeMatch) {
+    return {
+      style: STYLES.CODE,
+      matchLength: codeMatch[0].length
+    };
+  }
+
   // Match # , ## , or ### followed by a space at the start
   const match = text.match(/^(#{1,3})\s/);
 

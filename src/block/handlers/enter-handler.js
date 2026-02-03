@@ -1,8 +1,24 @@
-import { isNewLine } from '../wrote-block-utils.js';
+import { STYLES } from '../wrote-block-style.js';
+import { isNewLine, setCaretPosition } from '../wrote-block-utils.js';
 
 export function handleEnter(block, e) {
   if (!isNewLine(e)) {
     return false;
+  }
+
+  // For code blocks, insert a newline instead of creating a new block
+  if (block.style === STYLES.CODE && !e.shiftKey) {
+    const selection = window.getSelection();
+    if (!selection.rangeCount) return false;
+
+    const range = selection.getRangeAt(0);
+    const newLine = document.createTextNode(
+      block.isCaretAtEnd() ? "\n\n" : "\n");
+    range.insertNode(newLine);
+    
+    // Position caret after the target node
+    setCaretPosition(newLine, 1);
+    return true;
   }
 
   // Check if the block is empty

@@ -48,6 +48,12 @@ export function setCaretPosition(node, offset) {
   selection.addRange(range);
 }
 
+export function setCaretAfter(node) {
+  const parentNode = node.parentNode;
+  const offset = Array.from(parentNode.childNodes).indexOf(node) + 1;
+  setCaretPosition(parentNode, offset);
+}
+
 export function isCaretAtPosition(node, direction) {
   const range = getSelectionRange();
   if (!range) return false;
@@ -97,7 +103,7 @@ export function removeCharsFromStart(node, count) {
   }
 }
 
-export function isCaretNearLine(node, edge, threshold) {
+export function isCaretNearEdge(node, edge, threshold) {
   const range = getSelectionRange();
   if (!range) return true; // assume near line if we can't determine
 
@@ -106,11 +112,17 @@ export function isCaretNearLine(node, edge, threshold) {
     return true; // assume near line if coordinates are invalid
   }
 
-  const elementCoords = node.getBoundingClientRect();
+  // Create a range that encompasses all content in the element
+  const contentRange = document.createRange();
+  contentRange.selectNodeContents(node);
+  const contentCoords = contentRange.getBoundingClientRect();
+  if (!isValidRect(contentCoords)) {
+    return true; // assume near line if content bounds are invalid
+  }
 
   return edge === 'top'
-    ? caretCoords.top <= elementCoords.top + threshold
-    : caretCoords.bottom >= elementCoords.bottom - threshold;
+    ? caretCoords.top <= contentCoords.top + threshold
+    : caretCoords.bottom >= contentCoords.bottom - threshold;
 }
 
 /**

@@ -1,6 +1,23 @@
+import { setCaretPosition } from '../wrote-block-utils.js';
+import { STYLES } from '../wrote-block-style.js';
+
 export function handleTab(block, e) {
   if (e.key !== 'Tab') {
     return false;
+  }
+
+  // For code blocks, insert 2 spaces instead of changing indent
+  if (!block.isCaretAtStart() && block.style === STYLES.CODE) {
+    const selection = window.getSelection();
+    if (!selection.rangeCount) return false;
+
+    const range = selection.getRangeAt(0);
+    const spaces = document.createTextNode('  ');
+    range.insertNode(spaces);
+
+    // Position caret after the spaces
+    setCaretPosition(spaces.parentNode, Array.from(spaces.parentNode.childNodes).indexOf(spaces) + 1);
+    return true;
   }
 
   if (e.shiftKey) {
