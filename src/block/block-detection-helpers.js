@@ -1,3 +1,4 @@
+import { STYLES } from './wrote-block-style.js';
 import { detectAndApplyInlineCode, detectAndApplyBold, detectAndApplyItalic } from './wrote-inline-detector.js';
 
 /**
@@ -7,6 +8,7 @@ import { detectAndApplyInlineCode, detectAndApplyBold, detectAndApplyItalic } fr
  */
 
 export function detectAndApplyFormats(block) {
+  if (block.style === STYLES.CODE) return;
   block.detectAndApplyStyle();
   block.detectAndApplyPrefix();
   detectAndApplyInlineCode(block);

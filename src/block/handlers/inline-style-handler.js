@@ -1,8 +1,9 @@
-import { applyInlineStyle } from '../wrote-block-utils.js';
+import { applyInlineElement, getSelectionRange } from '../wrote-block-utils.js';
 
 export function handleInlineStyles(e) {
   // Check for Ctrl/Cmd key combination
   const isCtrlOrCmd = e.ctrlKey || e.metaKey;
+  const range = getSelectionRange();
 
   if (!isCtrlOrCmd) {
     return false;
@@ -10,13 +11,13 @@ export function handleInlineStyles(e) {
 
   switch (e.key.toLowerCase()) {
     case 'b':
-      applyInlineStyle('bold');
+      applyInlineElement(range, 'strong', 0);
       return true;
     case 'i':
-      applyInlineStyle('italic');
+      applyInlineElement(range, 'strong', 0);
       return true;
     case 'u':
-      applyInlineStyle('underline');
+      applyInlineElement(range, 'u', 0);
       return true;
     default:
       return false;
