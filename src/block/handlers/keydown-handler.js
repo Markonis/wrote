@@ -1,10 +1,9 @@
-import { handleTab } from './tab-handler.js';
+import { handleArrowKeys } from './arrow-handlers.js';
 import { handleBackspace } from './backspace-handler.js';
 import { handleDelete } from './delete-handler.js';
 import { handleEnter } from './enter-handler.js';
-import { handleArrowKeys } from './arrow-handlers.js';
 import { handleInlineStyles } from './inline-style-handler.js';
-import { detectAndApplyInlineCode, detectAndApplyBold, detectAndApplyItalic } from '../wrote-inline-detector.js';
+import { handleTab } from './tab-handler.js';
 
 export function handleKeyDown(block, e) {
   if (handleInlineStyles(e)) {
@@ -30,14 +29,6 @@ export function handleKeyDown(block, e) {
   if (handleArrowKeys(block, e)) {
     return true;
   }
-
-  setTimeout(() => {
-    block.detectAndApplyStyle();
-    block.detectAndApplyPrefix();
-    detectAndApplyInlineCode(block);
-    detectAndApplyBold(block);
-    detectAndApplyItalic(block);
-  });
 
   return false;
 }

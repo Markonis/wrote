@@ -1,4 +1,5 @@
 import { insertTextInRange } from '../wrote-block-utils.js';
+import { detectAndApplyFormats } from '../block-detection-helpers.js';
 
 export function handleBeforeInput(block, e) {
   // Only intercept text insertion events
@@ -14,6 +15,7 @@ export function handleBeforeInput(block, e) {
 
   const range = selection.getRangeAt(0);
   insertTextInRange(text, range);
+  detectAndApplyFormats(block);
 
   return true;
 }
