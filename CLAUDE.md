@@ -13,6 +13,7 @@ This is a block based wysiwyg notion-like editor. Key files:
 - `./src/block/wrote-block-prefix.js`: Handles block indentation and list decoration like bullet points
 - `./src/block/wrote-block-style.js`: Handles block styles like h1, h2, body
 - `./src/block/wrote-inline-detector.js`: Handles parsing special sequences while typing like **bold** or `/` slash commands
+- `./src/block/wrote-action-dropdown.js`: Action dropdown that shows after typing `/`
 - `./src/serde/`: Serialization and deserialization
 
 Other files are self-explanatory.
