@@ -1,4 +1,4 @@
-import { applyInlineElement } from './wrote-block-utils.js';
+import { applyInlineElement } from './utils/inline-styles.js';
 import { findPrecedingTextMatch } from './wrote-text-matcher.js';
 
 const MAX_LOOKBACK = 100;

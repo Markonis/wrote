@@ -1,4 +1,4 @@
-import { insertTextInRange } from '../wrote-block-utils.js';
+import { insertTextInRange } from '../utils/selection.js';
 import { detectAndApplyFormats } from '../block-detection-helpers.js';
 
 export function handleBeforeInput(block, e) {

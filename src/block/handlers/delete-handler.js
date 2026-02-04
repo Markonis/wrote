@@ -1,4 +1,4 @@
-import { isDelete } from '../wrote-block-utils.js';
+import { isDelete } from '../utils/key-events.js';
 
 export function handleDelete(block, e) {
   if (!isDelete(e) || !block.isCaretAtEnd()) {

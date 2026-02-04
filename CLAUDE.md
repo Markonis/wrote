@@ -9,7 +9,7 @@ This is a block based wysiwyg notion-like editor. Key files:
 - `./src/component/wrote-component.js`: Blocks are logically placed inside components. Components implement rules for navigation between blocks, like layouts
 - `./src/component/vertical-layout.js`: The only component and layout for now
 - `./src/block/wrote-block.js`: Block is the core class
-- `./src/wrote-block-utils.js`: Many shared helpers for manipulating the dom and selection
+- `./src/block/utils/`: Shared helpers for manipulating the dom and selection
 - `./src/block/wrote-block-prefix.js`: Handles block indentation and list decoration like bullet points
 - `./src/block/wrote-block-style.js`: Handles block styles like h1, h2, body
 - `./src/block/wrote-inline-detector.js`: Handles parsing special sequences while typing like **bold** or `/` slash commands

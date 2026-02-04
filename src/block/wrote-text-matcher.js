@@ -1,4 +1,4 @@
-import { isInsideNonEditableElement } from "./wrote-block-utils.js";
+import { isInsideNonEditableElement } from "./utils/dom.js";
 
 /**
  * Searches backwards from the caret position for text matching a condition.

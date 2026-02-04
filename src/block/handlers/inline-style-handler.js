@@ -1,4 +1,5 @@
-import { applyInlineElement, getSelectionRange } from '../wrote-block-utils.js';
+import { applyInlineElement } from '../utils/inline-styles.js';
+import { getSelectionRange } from '../utils/selection.js';
 
 export function handleInlineStyles(e) {
   // Check for Ctrl/Cmd key combination

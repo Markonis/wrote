@@ -1,4 +1,4 @@
-import { setCaretPosition } from '../wrote-block-utils.js';
+import { setCaretPosition } from '../utils/selection.js';
 import { STYLES } from '../wrote-block-style.js';
 
 export function handleTab(block, e) {

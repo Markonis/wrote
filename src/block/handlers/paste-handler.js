@@ -1,4 +1,5 @@
-import { insertTextInRange, handleNewLine } from '../wrote-block-utils.js';
+import { insertTextInRange } from '../utils/selection.js';
+import { handleNewLine } from '../utils/text-operations.js';
 import { detectAndApplyFormats } from '../block-detection-helpers.js';
 
 export function handlePaste(block, e) {

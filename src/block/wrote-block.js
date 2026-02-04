@@ -3,11 +3,9 @@ import {
   setCaretPosition,
   isCaretAtPosition,
   getCaretCoordinates as getCaretCoordinatesUtil,
-  removeCharsFromStart,
-  isCaretNearEdge,
-  isInsideNonEditableElement,
-  getDirectChildOf
-} from './wrote-block-utils.js';
+  isCaretNearEdge
+} from './utils/selection.js';
+import { removeCharsFromStart, isInsideNonEditableElement, getDirectChildOf } from './utils/dom.js';
 import { handleKeyDown } from './handlers/keydown-handler.js';
 import { handleBeforeInput } from './handlers/beforeinput-handler.js';
 import { handlePaste } from './handlers/paste-handler.js';
