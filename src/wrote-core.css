@@ -1,0 +1,58 @@
+/* Core layout and positioning styles for the Wrote editor */
+
+.wr-block {
+  display: flex;
+  align-items: flex-start;
+}
+
+.wr-block > :nth-child(2) {
+  flex-grow: 1;
+  white-space: pre-wrap;
+}
+
+.wr-block-code {
+  white-space: pre-wrap;
+  overflow-x: auto;
+}
+
+.wr-toolbar {
+  position: fixed;
+  display: flex;
+  flex-direction: row;
+  z-index: 1000;
+}
+
+.wr-toolbar.hidden {
+  display: none;
+}
+
+.wr-toolbar-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.wr-action-dropdown {
+  position: fixed;
+  display: flex;
+  flex-direction: column;
+  z-index: 1000;
+}
+
+.wr-action-dropdown.hidden {
+  display: none;
+}
+
+.wr-action-item {
+  cursor: pointer;
+}
+
+.wr-action-search {
+  outline: none;
+}
+
+.wr-action-items {
+  max-height: 300px;
+  overflow-y: auto;
+}
