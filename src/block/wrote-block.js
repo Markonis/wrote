@@ -10,6 +10,8 @@ import { removeCharsFromStart, isInsideNonEditableElement, getDirectChildOf } fr
 import { handleKeyDown } from './handlers/keydown-handler.js';
 import { handleBeforeInput } from './handlers/beforeinput-handler.js';
 import { handlePaste } from './handlers/paste-handler.js';
+import { handleCopy } from './handlers/copy-handler.js';
+import { handleCut } from './handlers/cut-handler.js';
 import { handleSelection } from './handlers/selection-handler.js';
 import { WroteBlockPrefix } from './wrote-block-prefix.js';
 import { STYLES, getBlockStyleClass, detectBlockStyle } from './wrote-block-style.js';
@@ -55,6 +57,14 @@ export class WroteBlock {
       if (handlePaste(this, e)) {
         e.preventDefault();
       }
+    });
+
+    this.contentElement.addEventListener('copy', (e) => {
+      handleCopy(this, e);
+    });
+
+    this.contentElement.addEventListener('cut', (e) => {
+      handleCut(this, e);
     });
 
     document.addEventListener('selectionchange', () => {
@@ -178,18 +188,29 @@ export class WroteBlock {
     }
   }
 
-  insertHtmlAtCaret(html) {
-    this.contentElement.focus();
-
+  /**
+   * Get the current selection range if it's within this block
+   * @returns {Range|null} The selection range if valid and within this block, otherwise null
+   */
+  getSelectedRange() {
     const selection = window.getSelection();
-    if (!selection.rangeCount) return;
+    if (selection.rangeCount === 0) return null;
 
     const range = selection.getRangeAt(0);
 
-    // Check if the range is within this contentElement
+    // Check if the range is within this block's contentElement
     if (!this.contentElement.contains(range.commonAncestorContainer)) {
-      return;
+      return null;
     }
+
+    return range;
+  }
+
+  insertHtmlAtCaret(html) {
+    this.contentElement.focus();
+
+    const range = this.getSelectedRange();
+    if (!range) return;
 
     // Parse the HTML and create nodes in the proper context
     const fragment = range.createContextualFragment(html);

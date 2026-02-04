@@ -4,18 +4,15 @@ export function handleSelection(block) {
 
   const selection = window.getSelection();
 
-  // TODO: Check if selection is within the block's contentElement
-
-  if (!selection.rangeCount || selection.isCollapsed) {
+  if (selection.isCollapsed) {
     // TODO: Hide toolbar when no selection
     editor.toolbar.hide();
     return;
   }
 
-  const range = selection.getRangeAt(0);
+  const range = block.getSelectedRange();
 
-  // TODO: Verify range is within this block's contentElement
-  if (!block.contentElement.contains(range.commonAncestorContainer)) {
+  if (!range) {
     editor.toolbar.hide();
     return;
   }

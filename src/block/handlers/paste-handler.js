@@ -1,11 +1,23 @@
 import { insertTextInRange } from '../utils/selection.js';
 import { handleNewLine } from '../utils/text-operations.js';
 import { detectAndApplyFormats } from '../block-detection-helpers.js';
+import { sanitizeHTML } from '../../serde/sanitizer.js';
 
 export function handlePaste(block, e) {
   e.preventDefault();
 
-  // Get plain text from clipboard
+  // Check for HTML content first (from our editor or rich text sources)
+  const html = e.clipboardData.getData('text/html');
+  if (html) {
+    // Sanitize to ensure only allowed formatting is preserved
+    const sanitized = sanitizeHTML(html);
+    if (sanitized) {
+      block.insertHtmlAtCaret(sanitized);
+      return true;
+    }
+  }
+
+  // Fall back to plain text from other sources
   const text = e.clipboardData.getData('text/plain');
   if (!text) return true;
 

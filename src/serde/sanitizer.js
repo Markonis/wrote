@@ -71,6 +71,45 @@ function handleOtherAllowedElement(child, walk) {
 }
 
 /**
+ * Replace a tag with a new tag name while preserving content and attributes
+ * @param {Element} element
+ * @param {string} newTagName
+ */
+function changeTag(element, newTagName) {
+  const newElement = document.createElement(newTagName);
+  while (element.firstChild) {
+    newElement.appendChild(element.firstChild);
+  }
+  while (element.attributes.length > 0) {
+    newElement.setAttribute(element.attributes[0].name, element.attributes[0].value);
+  }
+  element.parentNode.replaceChild(newElement, element);
+  return newElement;
+}
+
+/**
+ * Normalize semantic tag equivalents (b→strong, i→em)
+ * @param {Element} node
+ */
+function normalizeSemanticTags(node) {
+  const children = Array.from(node.childNodes);
+
+  for (const child of children) {
+    if (child.nodeType === Node.ELEMENT_NODE) {
+      if (child.tagName === 'B') {
+        const strong = changeTag(child, 'strong');
+        normalizeSemanticTags(strong);
+      } else if (child.tagName === 'I') {
+        const em = changeTag(child, 'em');
+        normalizeSemanticTags(em);
+      } else {
+        normalizeSemanticTags(child);
+      }
+    }
+  }
+}
+
+/**
  * Sanitize HTML by removing disallowed tags and all attributes
  * @param {string} html - The HTML string to sanitize
  * @returns {string} Sanitized HTML
@@ -78,6 +117,9 @@ function handleOtherAllowedElement(child, walk) {
 export function sanitizeHTML(html) {
   const parser = new DOMParser();
   const doc = parser.parseFromString(html, 'text/html');
+
+  // Normalize semantic tag equivalents first
+  normalizeSemanticTags(doc.body);
 
   const walk = (node) => {
     const children = Array.from(node.childNodes);
