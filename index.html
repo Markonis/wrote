@@ -26,13 +26,13 @@
       const editorElement = document.getElementById('editor');
 
       const actionProvider = (block) => [
-        { label: 'Heading 1', callback: ({ block }) => block.setStyle(STYLES.H1) },
-        { label: 'Heading 2', callback: ({ block }) => block.setStyle(STYLES.H2) },
-        { label: 'Heading 3', callback: ({ block }) => block.setStyle(STYLES.H3) },
-        { label: 'Code', callback: ({ block }) => block.setStyle(STYLES.CODE) },
-        { label: 'Body', callback: ({ block }) => block.setStyle(STYLES.BODY) },
-        { label: 'Insert Badge', callback: ({ block }) => block.insertHtmlAtCaret('<span contenteditable="false" class="badge bg-primary">Badge</span> ') },
-        { label: 'Insert Button', callback: ({ block }) => block.insertHtmlAtCaret('<button contenteditable="false" class="btn btn-sm btn-outline-primary">Click me</button> ') }
+        { labelHTML: 'Heading 1', searchText: 'heading 1 h1', callback: ({ block }) => block.setStyle(STYLES.H1) },
+        { labelHTML: 'Heading 2', searchText: 'heading 2 h2', callback: ({ block }) => block.setStyle(STYLES.H2) },
+        { labelHTML: 'Heading 3', searchText: 'heading 3 h3', callback: ({ block }) => block.setStyle(STYLES.H3) },
+        { labelHTML: 'Code', searchText: 'code', callback: ({ block }) => block.setStyle(STYLES.CODE) },
+        { labelHTML: 'Body', searchText: 'body text paragraph', callback: ({ block }) => block.setStyle(STYLES.BODY) },
+        { labelHTML: 'Insert Badge', searchText: 'badge insert', callback: ({ block }) => block.insertHtmlAtCaret('<span contenteditable="false" class="badge bg-primary">Badge</span> ') },
+        { labelHTML: 'Insert Button', searchText: 'button insert', callback: ({ block }) => block.insertHtmlAtCaret('<button contenteditable="false" class="btn btn-sm btn-outline-primary">Click me</button> ') }
       ];
 
       new WroteEditor(editorElement, { actionProvider });

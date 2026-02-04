@@ -3,8 +3,8 @@ import { isValidRect } from "./utils/selection.js";
 const DROPDOWN_PADDING = 5; // pixels below caret
 const HIDDEN_CLASS = 'hidden';
 
-function createActionItemHTML(label, index) {
-  return `<div class="wr-action-item${index === 0 ? ' selected' : ''}" data-index="${index}">${label}</div>`;
+function createActionItemHTML(labelHTML, index) {
+  return `<div class="wr-action-item${index === 0 ? ' selected' : ''}" data-index="${index}">${labelHTML}</div>`;
 }
 
 export class WroteActionDropdown {
@@ -93,7 +93,7 @@ export class WroteActionDropdown {
     } else {
       const query = this.searchQuery.toLowerCase();
       this.filteredActions = this.actions.filter(action =>
-        action.label.toLowerCase().includes(query)
+        action.searchText.toLowerCase().includes(query)
       );
     }
 
@@ -106,8 +106,16 @@ export class WroteActionDropdown {
 
   renderItems() {
     this.itemsContainer.innerHTML = this.filteredActions.map((action, index) =>
-      createActionItemHTML(action.label, index)
+      createActionItemHTML(action.labelHTML, index)
     ).join('');
+
+    // Add click handlers to action items
+    this.itemsContainer.querySelectorAll('.wr-action-item').forEach((item) => {
+      item.addEventListener('click', (_e) => {
+        this.selectedIndex = parseInt(item.dataset.index);
+        this.selectCurrent();
+      });
+    });
   }
 
   positionBelowCaret() {
