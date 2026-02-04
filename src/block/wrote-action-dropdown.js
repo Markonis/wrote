@@ -1,3 +1,5 @@
+import { isValidRect } from "./utils/selection.js";
+
 const DROPDOWN_PADDING = 5; // pixels below caret
 const HIDDEN_CLASS = 'hidden';
 
@@ -7,7 +9,6 @@ function createActionItemHTML(label, index) {
 
 export class WroteActionDropdown {
   constructor() {
-    this.element = this.createDropdownElement();
     this.isVisible = false;
     this.actions = [];
     this.filteredActions = [];
@@ -15,8 +16,7 @@ export class WroteActionDropdown {
     this.currentBlock = null;
     this.range = null;
     this.searchQuery = '';
-    this.searchInput = null;
-    this.itemsContainer = null;
+    this.element = this.createDropdownElement();
     document.addEventListener('keydown', (e) => {
       if (this.isVisible) {
         this.handleKeyDown(e);
@@ -113,11 +113,11 @@ export class WroteActionDropdown {
   positionBelowCaret() {
     if (!this.currentBlock) return;
 
-    const caretCoords = this.currentBlock.getCaretCoordinates();
-    if (!caretCoords) return;
+    const rect = this.range.getBoundingClientRect();
+    if (!isValidRect(rect)) return;
 
-    const top = caretCoords.y + DROPDOWN_PADDING;
-    const left = caretCoords.x + DROPDOWN_PADDING;
+    const top = rect.top + DROPDOWN_PADDING;
+    const left = rect.left + DROPDOWN_PADDING;
 
     this.element.style.top = top + 'px';
     this.element.style.left = left + 'px';
@@ -158,9 +158,14 @@ export class WroteActionDropdown {
       // Delete the "/" before invoking the callback
       if (range) {
         range.deleteContents();
+        // Restore selection to where the "/" was
+        range.collapse(true);
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
       }
 
-      action.callback(block);
+      action.callback({ block, range });
     }
   }
 

@@ -2,7 +2,7 @@ import {
   getCaretPositionFromPoint,
   setCaretPosition,
   isCaretAtPosition,
-  getCaretCoordinates as getCaretCoordinatesUtil,
+  getCaretRect,
   isCaretNearEdge,
   setCaretAfter
 } from './utils/selection.js';
@@ -130,8 +130,8 @@ export class WroteBlock {
     return isCaretNearEdge(this.contentElement, 'bottom', WroteBlock.LINE_POSITION_THRESHOLD);
   }
 
-  getCaretCoordinates() {
-    return getCaretCoordinatesUtil(this.contentElement);
+  getCaretRect() {
+    return getCaretRect(this.contentElement);
   }
 
   setCaretPosition(node, offset) {

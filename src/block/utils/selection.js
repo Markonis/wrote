@@ -1,5 +1,5 @@
 // Validation utilities
-function isValidRect(rect) {
+export function isValidRect(rect) {
   // A valid rect should have non-zero width or height
   return rect.width !== 0 || rect.height !== 0;
 }
@@ -82,7 +82,7 @@ export function isCaretAtPosition(node, direction) {
   return measureRange.toString().length === 0;
 }
 
-export function getCaretCoordinates(node) {
+export function getCaretRect(node) {
   const range = getSelectionRange();
   if (!range) return null;
 
@@ -93,7 +93,7 @@ export function getCaretCoordinates(node) {
     rect = node.getBoundingClientRect();
   }
 
-  return { x: rect.left, y: rect.top };
+  return rect;
 }
 
 export function isCaretNearEdge(node, edge, threshold) {

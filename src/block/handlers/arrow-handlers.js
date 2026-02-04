@@ -19,10 +19,10 @@ export function handleArrowUp(block, e) {
     return false;
   }
 
-  const coords = block.getCaretCoordinates();
-  if (!coords) return false;
+  const rect = block.getCaretRect();
+  if (!rect) return false;
 
-  return block.component.moveUp(block, coords.x);
+  return block.component.moveUp(block, rect.left);
 }
 
 export function handleArrowDown(block, e) {
@@ -30,10 +30,10 @@ export function handleArrowDown(block, e) {
     return false;
   }
 
-  const coords = block.getCaretCoordinates();
-  if (!coords) return false;
+  const rect = block.getCaretRect();
+  if (!rect) return false;
 
-  return block.component.moveDown(block, coords.x);
+  return block.component.moveDown(block, rect.left);
 }
 
 export function handleArrowKeys(block, e) {
