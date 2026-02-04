@@ -236,7 +236,7 @@ try {
         style: 'body',
         indent: 0,
         prefix: null,
-        content: 'Hello disallowed and alert("xss") <strong>bold</strong>'
+        content: 'Hello  and  <strong>bold</strong>'
       }
     ]
   };
@@ -245,6 +245,33 @@ try {
   logTest('[Serialization] Disallowed tags are removed', true, JSON.stringify(json, null, 2));
 } catch (e) {
   logTest('[Serialization] Disallowed tags are removed', false, e.message);
+}
+
+// Sanitization: Span/div with contenteditable="false" are preserved as empty
+try {
+  const component = new VerticalLayout();
+  const block = new WroteBlock(component);
+  component.blocks.push(block);
+
+  block.contentElement.innerHTML = 'Hello <span contenteditable="false" id="widget1" data-type="button">widget</span> and <div contenteditable="false" class="custom">content</div> <strong>bold</strong>';
+
+  const json = serializeComponent(component);
+  const expected = {
+    type: 'vertical-layout',
+    blocks: [
+      {
+        style: 'body',
+        indent: 0,
+        prefix: null,
+        content: 'Hello <span contenteditable="false" id="widget1" data-type="button"></span> and <div contenteditable="false" class="custom"></div> <strong>bold</strong>'
+      }
+    ]
+  };
+
+  assertDeepEqual(json, expected);
+  logTest('[Serialization] Span/div with contenteditable="false" are preserved', true, JSON.stringify(json, null, 2));
+} catch (e) {
+  logTest('[Serialization] Span/div with contenteditable="false" are preserved', false, e.message);
 }
 
 // Roundtrip - serialize and deserialize

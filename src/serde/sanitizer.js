@@ -1,7 +1,74 @@
 /**
  * Whitelist of HTML tags allowed in block content
  */
-const ALLOWED_TAGS = new Set(['STRONG', 'EM', 'U', 'CODE']);
+const ALLOWED_TAGS = new Set(['STRONG', 'EM', 'U', 'CODE', 'SPAN', 'DIV']);
+const SPAN_OR_DIV_TAGS = new Set(['SPAN', 'DIV']);
+
+/**
+ * Check if a tag is in the allowed list
+ * @param {string} tagName
+ * @returns {boolean}
+ */
+function isAllowedTag(tagName) {
+  return ALLOWED_TAGS.has(tagName);
+}
+
+/**
+ * Check if a tag is span or div
+ * @param {string} tagName
+ * @returns {boolean}
+ */
+function isSpanOrDiv(tagName) {
+  return SPAN_OR_DIV_TAGS.has(tagName);
+}
+
+/**
+ * Check if element has contenteditable="false"
+ * @param {Element} element
+ * @returns {boolean}
+ */
+function hasEditableAttribute(element) {
+  return element.getAttribute('contenteditable') === 'false';
+}
+
+/**
+ * Remove all attributes from an element
+ * @param {Element} element
+ */
+function removeAllAttributes(element) {
+  while (element.attributes.length > 0) {
+    element.removeAttribute(element.attributes[0].name);
+  }
+}
+
+/**
+ * Handle disallowed elements by removing them completely
+ * @param {Element} child
+ */
+function handleDisallowedElement(child) {
+  child.parentNode.removeChild(child);
+}
+
+/**
+ * Handle span/div elements with contenteditable="false"
+ * @param {Element} child
+ * @param {Function} walk - Recursive walk function
+ */
+function handleSpanOrDiv(child, walk) {
+  child.innerHTML = '';
+  // Keep all attributes on SPAN/DIV
+  walk(child);
+}
+
+/**
+ * Handle other allowed elements (STRONG, EM, U, CODE)
+ * @param {Element} child
+ * @param {Function} walk - Recursive walk function
+ */
+function handleOtherAllowedElement(child, walk) {
+  removeAllAttributes(child);
+  walk(child);
+}
 
 /**
  * Sanitize HTML by removing disallowed tags and all attributes
@@ -12,23 +79,19 @@ export function sanitizeHTML(html) {
   const parser = new DOMParser();
   const doc = parser.parseFromString(html, 'text/html');
 
-  // Get all elements in the document
   const walk = (node) => {
     const children = Array.from(node.childNodes);
 
     for (const child of children) {
       if (child.nodeType === Node.ELEMENT_NODE) {
-        if (!ALLOWED_TAGS.has(child.tagName)) {
-          // Replace disallowed element with its text content
-          const textNode = document.createTextNode(child.textContent);
-          child.parentNode.replaceChild(textNode, child);
+        if (!isAllowedTag(child.tagName)) {
+          handleDisallowedElement(child);
+        } else if (isSpanOrDiv(child.tagName) && !hasEditableAttribute(child)) {
+          handleDisallowedElement(child);
+        } else if (isSpanOrDiv(child.tagName)) {
+          handleSpanOrDiv(child, walk);
         } else {
-          // Remove all attributes from allowed elements
-          while (child.attributes.length > 0) {
-            child.removeAttribute(child.attributes[0].name);
-          }
-          // Recurse into children
-          walk(child);
+          handleOtherAllowedElement(child, walk);
         }
       }
     }

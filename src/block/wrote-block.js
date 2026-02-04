@@ -3,7 +3,8 @@ import {
   setCaretPosition,
   isCaretAtPosition,
   getCaretCoordinates as getCaretCoordinatesUtil,
-  isCaretNearEdge
+  isCaretNearEdge,
+  setCaretAfter
 } from './utils/selection.js';
 import { removeCharsFromStart, isInsideNonEditableElement, getDirectChildOf } from './utils/dom.js';
 import { handleKeyDown } from './handlers/keydown-handler.js';
@@ -175,5 +176,27 @@ export class WroteBlock {
       // Fallback: focus at start or end depending on edge
       edge === 'bottom' ? this.focusAtEnd() : this.focus();
     }
+  }
+
+  insertHtmlAtCaret(html) {
+    this.contentElement.focus();
+
+    const selection = window.getSelection();
+    if (!selection.rangeCount) return;
+
+    const range = selection.getRangeAt(0);
+
+    // Check if the range is within this contentElement
+    if (!this.contentElement.contains(range.commonAncestorContainer)) {
+      return;
+    }
+
+    // Parse the HTML and create nodes in the proper context
+    const fragment = range.createContextualFragment(html);
+    const lastNode = fragment.lastChild;
+    if (!lastNode) return
+
+    range.insertNode(fragment);
+    setCaretAfter(lastNode);
   }
 }

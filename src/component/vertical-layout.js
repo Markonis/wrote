@@ -71,6 +71,10 @@ export class VerticalLayout extends WroteComponent {
       sourceBlock.element.parentNode.appendChild(newBlock.element);
     }
 
+    if (this.editor?.onBlockCreated) {
+      this.editor.onBlockCreated(newBlock);
+    }
+
     return newBlock;
   }
 
@@ -102,6 +106,11 @@ export class VerticalLayout extends WroteComponent {
 
     this.blocks.splice(index, 1);
     block.element.remove();
+
+    if (this.editor?.onBlockRemoved) {
+      this.editor.onBlockRemoved(block);
+    }
+
     return true;
   }
 }
