@@ -10,9 +10,13 @@ export class WroteActionDropdown {
     this.element = this.createDropdownElement();
     this.isVisible = false;
     this.actions = [];
+    this.filteredActions = [];
     this.selectedIndex = 0;
     this.currentBlock = null;
     this.range = null;
+    this.searchQuery = '';
+    this.searchInput = null;
+    this.itemsContainer = null;
     document.addEventListener('keydown', (e) => {
       if (this.isVisible) {
         this.handleKeyDown(e);
@@ -23,6 +27,24 @@ export class WroteActionDropdown {
   createDropdownElement() {
     const dropdown = document.createElement('div');
     dropdown.className = `wr-action-dropdown ${HIDDEN_CLASS}`;
+
+    // Create search input
+    this.searchInput = document.createElement('input');
+    this.searchInput.type = 'text';
+    this.searchInput.className = 'wr-action-search';
+    this.searchInput.placeholder = 'Search actions...';
+    this.searchInput.addEventListener('input', (e) => {
+      this.searchQuery = e.target.value;
+      this.filterActions();
+    });
+
+    // Create container for action items
+    this.itemsContainer = document.createElement('div');
+    this.itemsContainer.className = 'wr-action-items';
+
+    dropdown.appendChild(this.searchInput);
+    dropdown.appendChild(this.itemsContainer);
+
     return dropdown;
   }
 
@@ -37,14 +59,19 @@ export class WroteActionDropdown {
     this.currentBlock = block;
     this.range = range;
     this.selectedIndex = 0;
+    this.searchQuery = '';
 
-    // Render the action list
-    this.element.innerHTML = this.actions.map((action, index) =>
-      createActionItemHTML(action.label, index)
-    ).join('');
+    // Reset search input
+    this.searchInput.value = '';
+
+    // Filter and render
+    this.filterActions();
 
     this.element.classList.remove(HIDDEN_CLASS);
     this.isVisible = true;
+
+    // Focus search input
+    this.searchInput.focus();
 
     // Position below the caret
     this.positionBelowCaret();
@@ -54,8 +81,33 @@ export class WroteActionDropdown {
     this.element.classList.add(HIDDEN_CLASS);
     this.isVisible = false;
     this.actions = [];
+    this.filteredActions = [];
     this.currentBlock = null;
     this.range = null;
+  }
+
+  filterActions() {
+    // Filter actions based on search query
+    if (this.searchQuery.trim() === '') {
+      this.filteredActions = this.actions;
+    } else {
+      const query = this.searchQuery.toLowerCase();
+      this.filteredActions = this.actions.filter(action =>
+        action.label.toLowerCase().includes(query)
+      );
+    }
+
+    // Reset selection to first item
+    this.selectedIndex = 0;
+
+    // Render filtered items
+    this.renderItems();
+  }
+
+  renderItems() {
+    this.itemsContainer.innerHTML = this.filteredActions.map((action, index) =>
+      createActionItemHTML(action.label, index)
+    ).join('');
   }
 
   positionBelowCaret() {
@@ -72,7 +124,7 @@ export class WroteActionDropdown {
   }
 
   selectNext() {
-    if (this.selectedIndex < this.actions.length - 1) {
+    if (this.selectedIndex < this.filteredActions.length - 1) {
       this.selectedIndex++;
       this.updateSelection();
     }
@@ -86,7 +138,7 @@ export class WroteActionDropdown {
   }
 
   updateSelection() {
-    const items = this.element.querySelectorAll('.wr-action-item');
+    const items = this.itemsContainer.querySelectorAll('.wr-action-item');
     items.forEach((item, index) => {
       if (index === this.selectedIndex) {
         item.classList.add('selected');
@@ -97,8 +149,8 @@ export class WroteActionDropdown {
   }
 
   selectCurrent() {
-    if (this.selectedIndex >= 0 && this.selectedIndex < this.actions.length) {
-      const action = this.actions[this.selectedIndex];
+    if (this.selectedIndex >= 0 && this.selectedIndex < this.filteredActions.length) {
+      const action = this.filteredActions[this.selectedIndex];
       const block = this.currentBlock;
       const range = this.range;
       this.hide();
