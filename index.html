@@ -22,10 +22,166 @@
     import { WroteEditor } from './src/wrote-editor.js';
     import { STYLES } from './src/block/wrote-block-style.js';
 
+    // Simple action dropdown handler
+    class ActionDropdownHandler {
+      constructor() {
+        this.isVisible = false;
+        this.currentBlock = null;
+        this.range = null;
+        this.selectedIndex = 0;
+        this.filteredActions = [];
+        this.allActions = [];
+        this.searchQuery = '';
+        this.element = this.createDropdownElement();
+
+        document.addEventListener('keydown', (e) => {
+          if (this.isVisible) this.handleKeyDown(e);
+        });
+      }
+
+      createDropdownElement() {
+        const dropdown = document.createElement('div');
+        dropdown.className = 'wr-action-dropdown hidden';
+
+        this.searchInput = document.createElement('input');
+        this.searchInput.type = 'text';
+        this.searchInput.className = 'wr-action-search';
+        this.searchInput.placeholder = 'Search actions...';
+        this.searchInput.addEventListener('input', (e) => {
+          this.searchQuery = e.target.value;
+          this.filterAndRender();
+        });
+
+        this.itemsContainer = document.createElement('div');
+        this.itemsContainer.className = 'wr-action-items';
+
+        dropdown.appendChild(this.searchInput);
+        dropdown.appendChild(this.itemsContainer);
+
+        return dropdown;
+      }
+
+      show(actions, block, range) {
+        if (!actions || actions.length === 0) return;
+
+        this.allActions = actions;
+        this.currentBlock = block;
+        this.range = range;
+        this.selectedIndex = 0;
+        this.searchQuery = '';
+        this.searchInput.value = '';
+
+        this.filterAndRender();
+        this.element.classList.remove('hidden');
+        this.isVisible = true;
+        this.searchInput.focus();
+        this.positionBelowCaret();
+      }
+
+      hide() {
+        this.element.classList.add('hidden');
+        this.isVisible = false;
+      }
+
+      filterAndRender() {
+        if (this.searchQuery.trim() === '') {
+          this.filteredActions = this.allActions;
+        } else {
+          const query = this.searchQuery.toLowerCase();
+          this.filteredActions = this.allActions.filter(action =>
+            action.searchText.toLowerCase().includes(query)
+          );
+        }
+
+        this.selectedIndex = 0;
+        this.itemsContainer.innerHTML = this.filteredActions.map((action, index) =>
+          `<div class="wr-action-item${index === 0 ? ' selected' : ''}" data-index="${index}">${action.labelHTML}</div>`
+        ).join('');
+
+        this.itemsContainer.querySelectorAll('.wr-action-item').forEach((item) => {
+          item.addEventListener('click', (_e) => {
+            this.selectedIndex = parseInt(item.dataset.index);
+            this.selectCurrent();
+          });
+        });
+      }
+
+      positionBelowCaret() {
+        if (!this.range) return;
+        const rect = this.range.getBoundingClientRect();
+        const top = rect.top + 5;
+        const left = rect.left + 5;
+        this.element.style.top = top + 'px';
+        this.element.style.left = left + 'px';
+      }
+
+      selectNext() {
+        if (this.selectedIndex < this.filteredActions.length - 1) {
+          this.selectedIndex++;
+          this.updateSelection();
+        }
+      }
+
+      selectPrevious() {
+        if (this.selectedIndex > 0) {
+          this.selectedIndex--;
+          this.updateSelection();
+        }
+      }
+
+      updateSelection() {
+        this.itemsContainer.querySelectorAll('.wr-action-item').forEach((item, index) => {
+          if (index === this.selectedIndex) {
+            item.classList.add('selected');
+          } else {
+            item.classList.remove('selected');
+          }
+        });
+      }
+
+      selectCurrent() {
+        if (this.selectedIndex >= 0 && this.selectedIndex < this.filteredActions.length) {
+          const action = this.filteredActions[this.selectedIndex];
+
+          // Delete the "/" before invoking the callback
+          if (this.range) {
+            this.range.deleteContents();
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(this.range);
+          }
+
+          this.hide();
+          action.callback({ block: this.currentBlock });
+        }
+      }
+
+      handleKeyDown(e) {
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          this.selectNext();
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          this.selectPrevious();
+        } else if (e.key === 'Enter') {
+          e.preventDefault();
+          this.selectCurrent();
+        } else if (e.key === 'Escape') {
+          e.preventDefault();
+          this.hide();
+        }
+      }
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       const editorElement = document.getElementById('editor');
 
-      const actionProvider = (block) => [
+      // Create dropdown handler
+      const dropdownHandler = new ActionDropdownHandler();
+      document.body.appendChild(dropdownHandler.element);
+
+      // Define available actions
+      const getActions = () => [
         { labelHTML: 'Heading 1', searchText: 'heading 1 h1', callback: ({ block }) => block.setStyle(STYLES.H1) },
         { labelHTML: 'Heading 2', searchText: 'heading 2 h2', callback: ({ block }) => block.setStyle(STYLES.H2) },
         { labelHTML: 'Heading 3', searchText: 'heading 3 h3', callback: ({ block }) => block.setStyle(STYLES.H3) },
@@ -35,7 +191,14 @@
         { labelHTML: 'Insert Button', searchText: 'button insert', callback: ({ block }) => block.insertHtmlAtCaret('<button contenteditable="false" class="btn btn-sm btn-outline-primary">Click me</button> ') }
       ];
 
-      new WroteEditor(editorElement, { actionProvider });
+      // Create editor with "/" trigger
+      new WroteEditor(editorElement, {
+        triggers: {
+          '/': (block, range) => {
+            dropdownHandler.show(getActions(), block, range);
+          }
+        }
+      });
     });
   </script>
 </body>
