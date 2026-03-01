@@ -44,7 +44,7 @@ export class WroteBlockPrefix {
     this.indent = 0;
     this.unit = indentUnit;
     this.element = document.createElement('div');
-    this.element.className = 'wrote-prefix';
+    this.element.className = 'wr-block-prefix';
     this.element.style.marginRight = '0.25rem';
 
     this.element.addEventListener('click', () => this.toggle());
@@ -74,7 +74,7 @@ export class WroteBlockPrefix {
 
   render() {
     this.element.innerHTML = '';
-    this.element.className = 'wrote-prefix';
+    this.element.className = 'wr-block-prefix';
 
     // Set cursor style based on whether prefix is clickable
     if (this.isClickable()) {
