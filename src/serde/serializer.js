@@ -6,9 +6,23 @@ import { VerticalLayout } from '../component/vertical-layout.js';
 /** @import { WroteBlock } from '../block/wrote-block.js' */
 
 /**
+ * @typedef {Object} SerializedBlock
+ * @property {string} style
+ * @property {number} indent
+ * @property {string} prefix
+ * @property {string} content
+ */
+
+/**
+ * @typedef {Object} SerializedComponent
+ * @property {string} type
+ * @property {SerializedBlock[]} blocks
+ */
+
+/**
  * Serialize a component to JSON
  * @param {WroteComponent} component - The component to serialize
- * @returns {Object} JSON representation of the component
+ * @returns {SerializedComponent} JSON representation of the component
  */
 export function serializeComponent(component) {
   if (component instanceof VerticalLayout) {
@@ -24,7 +38,7 @@ export function serializeComponent(component) {
 /**
  * Serialize a single block to JSON
  * @param {WroteBlock} block - The block to serialize
- * @returns {Object} JSON representation of the block
+ * @returns {SerializedBlock} JSON representation of the block
  */
 export function serializeBlock(block) {
   return {
