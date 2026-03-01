@@ -1,3 +1,8 @@
+/** @import { WroteBlock } from '../wrote-block.js' */
+
+/**
+ * @param {WroteBlock} block
+ */
 export function handleSelection(block) {
   const editor = block.component.getEditor();
   if (!editor) return;

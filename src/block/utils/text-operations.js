@@ -1,6 +1,12 @@
 import { STYLES } from '../wrote-block-style.js';
 import { setCaretPosition } from './selection.js';
 
+/** @import { WroteBlock } from '../wrote-block.js' */
+
+/**
+ * @param {WroteBlock} block
+ * @param {boolean} shiftKey
+ */
 export function handleNewLine(block, shiftKey) {
   // For code blocks, insert a newline instead of creating a new block
   if (block.style === STYLES.CODE && !shiftKey) {

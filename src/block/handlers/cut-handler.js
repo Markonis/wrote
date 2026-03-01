@@ -1,5 +1,7 @@
 import { handleCopy } from './copy-handler.js';
 
+/** @import { WroteBlock } from '../wrote-block.js' */
+
 /**
  * Handle cut event - copy to clipboard and delete selection
  * @param {WroteBlock} block

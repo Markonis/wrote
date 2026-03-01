@@ -1,5 +1,11 @@
 import { isBackspace } from '../utils/key-events.js';
 
+/** @import { WroteBlock } from '../wrote-block.js' */
+
+/**
+ * @param {WroteBlock} block
+ * @param {KeyboardEvent} e
+ */
 export function handleBackspace(block, e) {
   if (!isBackspace(e) || !block.isCaretAtStart()) {
     return false;

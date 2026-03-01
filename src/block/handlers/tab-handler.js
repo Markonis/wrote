@@ -1,6 +1,12 @@
 import { setCaretPosition } from '../utils/selection.js';
 import { STYLES } from '../wrote-block-style.js';
 
+/** @import { WroteBlock } from '../wrote-block.js' */
+
+/**
+ * @param {WroteBlock} block
+ * @param {KeyboardEvent} e
+ */
 export function handleTab(block, e) {
   if (e.key !== 'Tab') {
     return false;

@@ -1,5 +1,11 @@
 import { isDelete } from '../utils/key-events.js';
 
+/** @import { WroteBlock } from '../wrote-block.js' */
+
+/**
+ * @param {WroteBlock} block
+ * @param {KeyboardEvent} e
+ */
 export function handleDelete(block, e) {
   if (!isDelete(e) || !block.isCaretAtEnd()) {
     return false;

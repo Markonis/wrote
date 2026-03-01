@@ -1,5 +1,10 @@
 import { setCaretPosition } from "../utils/selection.js"
 
+/** @import { WroteBlock } from '../wrote-block.js' */
+
+/**
+ * @param {WroteBlock} block
+ */
 export function handleInput(block) {
   const brs = block.contentElement.querySelectorAll("br");
   for (const br of brs) {

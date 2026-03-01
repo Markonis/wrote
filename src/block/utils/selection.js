@@ -1,10 +1,19 @@
 // Validation utilities
+
+/**
+ * @param {DOMRect} rect
+ */
 export function isValidRect(rect) {
   // A valid rect should have non-zero width or height
   return rect.width !== 0 || rect.height !== 0;
 }
 
 // Caret positioning utilities
+
+/**
+ * @param {number} x
+ * @param {number} y
+ */
 export function getCaretPositionFromPoint(x, y) {
   // Handle both caretPositionFromPoint (standard) and caretRangeFromPoint (Safari)
   if (document.caretPositionFromPoint) {
@@ -26,6 +35,10 @@ export function getSelectionRange() {
   return selection.rangeCount ? selection.getRangeAt(0) : null;
 }
 
+/**
+ * @param {Node} node
+ * @param {number} offset
+ */
 export function setCaretPosition(node, offset) {
   const range = document.createRange();
   const selection = window.getSelection();
@@ -35,12 +48,19 @@ export function setCaretPosition(node, offset) {
   selection.addRange(range);
 }
 
+/**
+ * @param {Node} node
+ */
 export function setCaretAfter(node) {
   const parentNode = node.parentNode;
   const offset = Array.from(parentNode.childNodes).indexOf(node) + 1;
   setCaretPosition(parentNode, offset);
 }
 
+/**
+ * @param {string} text
+ * @param {Range} range
+ */
 export function insertTextInRange(text, range) {
   // Delete selected content if any
   if (!range.collapsed) {
@@ -66,6 +86,10 @@ export function insertTextInRange(text, range) {
   selection.addRange(range);
 }
 
+/**
+ * @param {Node} node
+ * @param {'start' | 'end'} direction
+ */
 export function isCaretAtPosition(node, direction) {
   const range = getSelectionRange();
   if (!range) return false;
@@ -82,6 +106,9 @@ export function isCaretAtPosition(node, direction) {
   return measureRange.toString().length === 0;
 }
 
+/**
+ * @param {Node} node
+ */
 export function getCaretRect(node) {
   const range = getSelectionRange();
   if (!range) return null;
@@ -96,6 +123,11 @@ export function getCaretRect(node) {
   return rect;
 }
 
+/**
+ * @param {Node} node
+ * @param {'top' | 'bottom'} edge
+ * @param {number} threshold
+ */
 export function isCaretNearEdge(node, edge, threshold) {
   const range = getSelectionRange();
   if (!range) return true; // assume near line if we can't determine

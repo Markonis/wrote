@@ -1,6 +1,12 @@
 import { insertTextInRange } from '../utils/selection.js';
 import { detectAndApplyFormats } from '../block-detection-helpers.js';
 
+/** @import { WroteBlock } from '../wrote-block.js' */
+
+/**
+ * @param {WroteBlock} block
+ * @param {InputEvent} e
+ */
 export function handleBeforeInput(block, e) {
   // Only intercept text insertion events
   if (e.inputType !== 'insertText' && e.inputType !== 'insertCompositionText') {

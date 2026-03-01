@@ -1,8 +1,12 @@
 // DOM node manipulation utilities
 
+/**
+ * @param {Node} node
+ * @param {number} count
+ */
 export function removeCharsFromStart(node, count) {
   let charsRemoved = 0;
-  for (let childNode of node.childNodes) {
+  for (const childNode of node.childNodes) {
     if (childNode.nodeType === Node.TEXT_NODE) {
       if (charsRemoved + childNode.textContent.length <= count) {
         // Remove entire text node

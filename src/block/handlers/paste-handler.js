@@ -3,6 +3,12 @@ import { handleNewLine } from '../utils/text-operations.js';
 import { detectAndApplyFormats } from '../block-detection-helpers.js';
 import { sanitizeHTML } from '../../serde/sanitizer.js';
 
+/** @import { WroteBlock } from '../wrote-block.js' */
+
+/**
+ * @param {WroteBlock} block
+ * @param {ClipboardEvent} e
+ */
 export function handlePaste(block, e) {
   e.preventDefault();
 

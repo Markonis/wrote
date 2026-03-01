@@ -1,3 +1,9 @@
+/** @import { WroteBlock } from '../wrote-block.js' */
+
+/**
+ * @param {WroteBlock} block
+ * @param {KeyboardEvent} e
+ */
 export function handleArrowLeft(block, e) {
   if (e.key !== 'ArrowLeft' || !block.isCaretAtStart()) {
     return false;
@@ -6,6 +12,10 @@ export function handleArrowLeft(block, e) {
   return block.component.moveLeft(block);
 }
 
+/**
+ * @param {WroteBlock} block
+ * @param {KeyboardEvent} e
+ */
 export function handleArrowRight(block, e) {
   if (e.key !== 'ArrowRight' || !block.isCaretAtEnd()) {
     return false;
@@ -14,6 +24,10 @@ export function handleArrowRight(block, e) {
   return block.component.moveRight(block);
 }
 
+/**
+ * @param {WroteBlock} block
+ * @param {KeyboardEvent} e
+ */
 export function handleArrowUp(block, e) {
   if (e.key !== 'ArrowUp' || !block.isCaretOnFirstLine()) {
     return false;
@@ -25,6 +39,10 @@ export function handleArrowUp(block, e) {
   return block.component.moveUp(block, rect.left);
 }
 
+/**
+ * @param {WroteBlock} block
+ * @param {KeyboardEvent} e
+ */
 export function handleArrowDown(block, e) {
   if (e.key !== 'ArrowDown' || !block.isCaretOnLastLine()) {
     return false;
@@ -36,6 +54,10 @@ export function handleArrowDown(block, e) {
   return block.component.moveDown(block, rect.left);
 }
 
+/**
+ * @param {WroteBlock} block
+ * @param {KeyboardEvent} e
+ */
 export function handleArrowKeys(block, e) {
   return (
     handleArrowLeft(block, e) ||

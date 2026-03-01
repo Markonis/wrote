@@ -1,4 +1,7 @@
 {
+  "compilerOptions": {
+    "lib": ["dom", "dom.iterable", "deno.ns"]
+  },
   "tasks": {
     "test": "deno run --allow-net --allow-read --allow-run tests/server.js"
   },

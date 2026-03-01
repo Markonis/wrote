@@ -1,6 +1,9 @@
 import { applyInlineElement } from '../utils/inline-styles.js';
 import { getSelectionRange } from '../utils/selection.js';
 
+/**
+ * @param {KeyboardEvent} e
+ */
 export function handleInlineStyles(e) {
   // Check for Ctrl/Cmd key combination
   const isCtrlOrCmd = e.ctrlKey || e.metaKey;

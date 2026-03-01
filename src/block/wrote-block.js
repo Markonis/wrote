@@ -6,6 +6,7 @@ import {
   isCaretNearEdge,
   setCaretAfter
 } from './utils/selection.js';
+
 import { removeCharsFromStart, isInsideNonEditableElement, getDirectChildOf } from './utils/dom.js';
 import { handleKeyDown } from './handlers/keydown-handler.js';
 import { handleBeforeInput } from './handlers/beforeinput-handler.js';
@@ -17,15 +18,22 @@ import { WroteBlockPrefix } from './wrote-block-prefix.js';
 import { STYLES, getBlockStyleClass, detectBlockStyle } from './wrote-block-style.js';
 import { handleInput } from "./handlers/input-handler.js";
 
+/** @import { WroteComponent } from '../component/wrote-component.js' */
+
 export class WroteBlock {
   static LINE_POSITION_THRESHOLD = 5; // pixels
   static INDENT_UNIT = "1.5rem"; // indent multiplier
 
   constructor(component) {
+    /** @type {WroteComponent} */
     this.component = component;
+    /** @type {HTMLDivElement} */
     this.element = document.createElement('div');
+    /** @type {HTMLDivElement} */
     this.contentElement = document.createElement('div');
+    /** @type {WroteBlockPrefix} */
     this.prefix = new WroteBlockPrefix(WroteBlock.INDENT_UNIT);
+    /** @type {string} */
     this.style = STYLES.BODY;
     this.init();
   }

@@ -1,5 +1,7 @@
 import { sanitizeHTML } from '../../serde/sanitizer.js';
 
+/** @import { WroteBlock } from '../wrote-block.js' */
+
 /**
  * Handle copy event - put selected content as sanitized HTML on clipboard
  * @param {WroteBlock} block

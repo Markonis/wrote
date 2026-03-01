@@ -1,8 +1,13 @@
 import { applyInlineElement } from './utils/inline-styles.js';
 import { findPrecedingTextMatch } from './wrote-text-matcher.js';
 
+/** @import { WroteBlock } from './wrote-block.js' */
+
 const MAX_LOOKBACK = 100;
 
+/**
+ * @param {WroteBlock} block
+ */
 export function detectAndApplyInlineCode(block) {
   const range = findPrecedingTextMatch({
     node: block.contentElement,
@@ -22,6 +27,9 @@ export function detectAndApplyInlineCode(block) {
   return applyInlineElement(range, 'code', 1);
 }
 
+/**
+ * @param {WroteBlock} block
+ */
 export function detectAndApplyBold(block) {
   const range = findPrecedingTextMatch({
     node: block.contentElement,
@@ -41,6 +49,9 @@ export function detectAndApplyBold(block) {
   return applyInlineElement(range, 'strong', 2);
 }
 
+/**
+ * @param {WroteBlock} block
+ */
 export function detectAndApplyItalic(block) {
   const range = findPrecedingTextMatch({
     node: block.contentElement,
@@ -60,6 +71,9 @@ export function detectAndApplyItalic(block) {
   return applyInlineElement(range, 'em', 1);
 }
 
+/**
+ * @param {WroteBlock} block
+ */
 export function detectAndApplyTriggers(block) {
   const editor = block.component.getEditor();
 

@@ -2,6 +2,9 @@ import { COMPONENT_TYPES } from './serde-constants.js';
 import { sanitizeHTML } from './sanitizer.js';
 import { VerticalLayout } from '../component/vertical-layout.js';
 
+/** @import { WroteComponent } from '../component/wrote-component.js' */
+/** @import { WroteBlock } from '../block/wrote-block.js' */
+
 /**
  * Serialize a component to JSON
  * @param {WroteComponent} component - The component to serialize
