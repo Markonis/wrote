@@ -15,6 +15,7 @@ import { handleCut } from './handlers/cut-handler.js';
 import { handleSelection } from './handlers/selection-handler.js';
 import { WroteBlockPrefix } from './wrote-block-prefix.js';
 import { STYLES, getBlockStyleClass, detectBlockStyle } from './wrote-block-style.js';
+import { handleInput } from "./handlers/input-handler.js";
 
 export class WroteBlock {
   static LINE_POSITION_THRESHOLD = 5; // pixels
@@ -43,6 +44,12 @@ export class WroteBlock {
 
     this.contentElement.addEventListener('beforeinput', (e) => {
       if (handleBeforeInput(this, e)) {
+        e.preventDefault();
+      }
+    });
+
+    this.contentElement.addEventListener('input', (e) => {
+      if (handleInput(this)) {
         e.preventDefault();
       }
     });

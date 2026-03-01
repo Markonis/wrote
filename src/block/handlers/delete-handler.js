@@ -17,8 +17,7 @@ export function handleDelete(block, e) {
 
     // Remove the next block via component
     block.component.remove(nextBlock);
-    return true;
   }
 
-  return false;
+  return true;
 }

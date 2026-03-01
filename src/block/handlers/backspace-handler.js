@@ -8,7 +8,6 @@ export function handleBackspace(block, e) {
   // If we have a prefix, clear it instead of merging
   if (block.prefix.getValue()) {
     block.prefix.setValue(null);
-    return true;
   }
 
   const mergeResult = block.component.merge(block);
@@ -23,8 +22,7 @@ export function handleBackspace(block, e) {
     // Remove this block via component and focus target
     block.component.remove(block);
     targetBlock.setCaretPosition(targetBlock.contentElement, mergeOffset);
-    return true;
   }
 
-  return false;
+  return true;
 }
