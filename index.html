@@ -14,9 +14,13 @@
       border-radius: 0.5rem;
       border: 1px solid lightgray;
     }
+
+    [contenteditable=true] {
+      outline: none;
+    }
   </style>
 </head>
-<body>
+<body class="p-4">
   <div id="editor"></div>
   <script type="module">
     import { WroteEditor } from './src/wrote-editor.js';
