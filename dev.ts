@@ -6,10 +6,7 @@ const app = new Hono();
 // Static files
 app.use(
   "/*",
-  serveStatic({
-    root: "./src",
-    // rewriteRequestPath: (path) => path.replace(/^\/client/, ""),
-  }),
+  serveStatic({ root: "./v2" }),
 );
 
 Deno.serve({ port: 4000 }, app.fetch);
